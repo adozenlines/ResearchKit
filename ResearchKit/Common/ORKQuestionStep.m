@@ -30,11 +30,13 @@
 
 
 #import "ORKQuestionStep.h"
-#import "ORKHelpers.h"
+
+#import "ORKQuestionStepViewController.h"
+
 #import "ORKAnswerFormat_Internal.h"
 #import "ORKStep_Private.h"
-#import "ORKQuestionStepViewController.h"
-#import "ORKDefines_Private.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKQuestionStep
@@ -50,6 +52,18 @@
     ORKQuestionStep *step = [[ORKQuestionStep alloc] initWithIdentifier:identifier];
     step.title = title;
     step.answerFormat = answer;
+    return step;
+}
+
++ (instancetype)questionStepWithIdentifier:(NSString *)identifier
+                                     title:(nullable NSString *)title
+                                      text:(nullable NSString *)text
+                                    answer:(nullable ORKAnswerFormat *)answerFormat {
+
+    ORKQuestionStep *step = [[ORKQuestionStep alloc] initWithIdentifier:identifier];
+    step.title = title;
+    step.text = text;
+    step.answerFormat = answerFormat;
     return step;
 }
 
@@ -74,6 +88,13 @@
 
 - (void)validateParameters {
     [super validateParameters];
+    
+    if([self.answerFormat isKindOfClass:[ORKConfirmTextAnswerFormat class]]) {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                                       reason:@"ORKConfirmTextAnswerFormat can only be used with an ORKFormStep."
+                                     userInfo:nil];
+    }
+    
     [[self impliedAnswerFormat] validateParameters];
 }
 
@@ -94,7 +115,7 @@
 }
 
 - (NSUInteger)hash {
-    return [super hash] ^ [self.answerFormat hash];
+    return super.hash ^ self.answerFormat.hash;
 }
 
 - (ORKQuestionType)questionType {
@@ -145,13 +166,18 @@
 }
 
 - (BOOL)isFormatFitsChoiceCells {
-    return ((self.questionType == ORKQuestionTypeSingleChoice && NO==[self isFormatChoiceWithImageOptions] && NO==[self isFormatChoiceValuePicker]) ||
-            (self.questionType == ORKQuestionTypeMultipleChoice && NO==[self isFormatChoiceWithImageOptions]) ||
+    return ((self.questionType == ORKQuestionTypeSingleChoice && ![self isFormatChoiceWithImageOptions] && ![self isFormatChoiceValuePicker]) ||
+            (self.questionType == ORKQuestionTypeMultipleChoice && ![self isFormatChoiceWithImageOptions]) ||
             self.questionType == ORKQuestionTypeBoolean);
 }
 
 - (BOOL)formatRequiresTableView {
     return [self isFormatFitsChoiceCells];
+}
+
+- (NSSet<HKObjectType *> *)requestedHealthKitTypesForReading {
+    HKObjectType *objType = [[self answerFormat] healthKitObjectTypeForAuthorization];
+    return (objType != nil) ? [NSSet setWithObject:objType] : nil;
 }
 
 @end

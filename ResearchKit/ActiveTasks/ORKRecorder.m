@@ -32,20 +32,27 @@
 
 #import "ORKRecorder.h"
 #import "ORKRecorder_Internal.h"
-#import "ORKRecorder_Private.h"
-#import "ORKHelpers.h"
+
 #import "ORKDataLogger.h"
-#import "ORKDefines_Private.h"
+#import "ORKResult.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKRecorderConfiguration
 
++ (instancetype)new {
+    ORKThrowMethodUnavailableException();
+}
+
+- (instancetype)init {
+    ORKThrowMethodUnavailableException();
+}
+
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     self = [super init];
     if (self) {
-        if (nil == identifier) {
-            @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"identifier cannot be nil." userInfo:nil];
-        }
+        ORKThrowInvalidArgumentExceptionIfNil(identifier);
         _identifier = [identifier copy];
     }
     return self;
@@ -82,7 +89,7 @@
     return nil;
 }
 
-- (NSSet *)requestedHealthKitTypesForReading {
+- (NSSet<HKObjectType *> *)requestedHealthKitTypesForReading {
     return nil;
 }
 - (ORKPermissionMask)requestedPermissionMask {
@@ -95,6 +102,10 @@
 @implementation ORKRecorder {
     UIBackgroundTaskIdentifier _backgroundTask;
     NSUUID *_recorderUUID;
+}
+
++ (instancetype)new {
+    ORKThrowMethodUnavailableException();
 }
 
 - (instancetype)init {
@@ -167,10 +178,10 @@
 }
 
 - (NSURL *)recordingDirectoryURL {
-    if (! _outputDirectory) {
+    if (!_outputDirectory) {
         return nil;
     }
-    return [NSURL fileURLWithPath:[_outputDirectory.path stringByAppendingPathComponent:[NSString stringWithFormat:@"recorder-%@",[_recorderUUID UUIDString]]]];
+    return [NSURL fileURLWithPath:[_outputDirectory.path stringByAppendingPathComponent:[NSString stringWithFormat:@"recorder-%@", _recorderUUID.UUIDString]]];
 }
 
 - (NSString *)recorderType {
@@ -178,12 +189,12 @@
 }
 
 - (NSString *)logName {
-    return [NSString stringWithFormat:@"%@_%@", [self recorderType],self.identifier];
+    return [NSString stringWithFormat:@"%@_%@", [self recorderType], _recorderUUID.UUIDString];
 }
 
-- (ORKDataLogger *)makeJSONDataLoggerWithError:(NSError * __autoreleasing *)error {
+- (ORKDataLogger *)makeJSONDataLoggerWithError:(NSError **)error {
     NSURL *workingDir = [self recordingDirectoryURL];
-    if (! workingDir) {
+    if (!workingDir) {
         if (error) {
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteInvalidFileNameError userInfo:@{NSLocalizedDescriptionKey:ORKLocalizedString(@"ERROR_RECORDER_NO_OUTPUT_DIRECTORY", nil)}];
         }
@@ -218,8 +229,8 @@
 - (void)applyFileProtection:(ORKFileProtectionMode)fileProtection toFileAtURL:(NSURL *)url {
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSError *error = nil;
-    if (!  [fileManager setAttributes:@{NSFileProtectionKey : ORKFileProtectionFromMode(fileProtection)} ofItemAtPath:[url path] error:&error]) {
-        ORK_Log_Debug(@"Error setting %@ on %@: %@", ORKFileProtectionFromMode(fileProtection), url, error);
+    if (! [fileManager setAttributes:@{NSFileProtectionKey: ORKFileProtectionFromMode(fileProtection)} ofItemAtPath:[url path] error:&error]) {
+        ORK_Log_Warning(@"Error setting %@ on %@: %@", ORKFileProtectionFromMode(fileProtection), url, error);
     }
 }
 
@@ -231,7 +242,7 @@
             ORKFileResult *result = [[ORKFileResult alloc] initWithIdentifier:self.identifier];
             result.contentType = [self mimeType];
             result.fileURL = fileUrl;
-            result.userInfo = [self userInfo];
+            result.userInfo = self.userInfo;
             result.startDate = self.startDate;
             
             [localDelegate recorder:self didCompleteWithResult:result];
@@ -240,7 +251,7 @@
             [self reset];
         }
     } else {
-        if (! error) {
+        if (!error) {
             error = [NSError errorWithDomain:NSCocoaErrorDomain
                                         code:NSFileReadNoSuchFileError
                                     userInfo:@{NSLocalizedDescriptionKey:ORKLocalizedString(@"ERROR_RECORDER_NO_DATA", nil)}];

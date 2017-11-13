@@ -29,9 +29,8 @@
  */
 
 
-#import <Foundation/Foundation.h>
-#import <XCTest/XCTest.h>
-#import "ORKDataLogger.h"
+@import XCTest;
+@import ResearchKit.Private;
 
 
 @interface ORKDataLoggerManagerTests : XCTestCase <ORKDataLoggerManagerDelegate> {
@@ -62,7 +61,7 @@
 - (void)setUp {
     [super setUp];
     
-    _directory = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] isDirectory:YES];
+    _directory = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSUUID UUID].UUIDString] isDirectory:YES];
     
     BOOL success = [[NSFileManager defaultManager] createDirectoryAtURL:_directory withIntermediateDirectories:YES attributes:nil error:nil];
     XCTAssertTrue(success, @"Create log directory");
@@ -92,7 +91,7 @@
     [_manager addJSONDataLoggerForLogName:@"test2"];
     [_manager addJSONDataLoggerForLogName:@"test3"];
     
-    XCTAssertEqual([[_manager logNames] count], 3);
+    XCTAssertEqual([_manager logNames].count, 3);
 }
 
 - (void)testPreservesParameters {
@@ -191,9 +190,9 @@
     XCTAssertEqual(_totalBytesReachedCounter, 1);
     XCTAssertEqual(_pendingUploadBytesReachedCounter, 0);
     
-    NSError *err = nil;
-    XCTAssertTrue([_manager removeOldAndUploadedLogsToThreshold:9 error:&err]);
-    XCTAssertNil(err);
+    NSError *error = nil;
+    XCTAssertTrue([_manager removeOldAndUploadedLogsToThreshold:9 error:&error]);
+    XCTAssertNil(error);
     [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:filesystemSettleTime]];
     XCTAssertTrue(_manager.totalBytes <= 10);
     

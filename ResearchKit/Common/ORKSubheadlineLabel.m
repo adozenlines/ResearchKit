@@ -30,17 +30,16 @@
 
 
 #import "ORKSubheadlineLabel.h"
+
 #import "ORKSkin.h"
 
 
 @implementation ORKSubheadlineLabel
 
 + (UIFont *)defaultFont {
-    UIWindow *window = [[[UIApplication sharedApplication] windows] firstObject];
-    ORKScreenType screenType = ORKGetScreenTypeForWindow(window);
     UIFontDescriptor *descriptor = [UIFontDescriptor preferredFontDescriptorWithTextStyle:UIFontTextStyleSubheadline];
     const CGFloat defaultSize = 15;
-    return [UIFont systemFontOfSize:[[descriptor objectForKey: UIFontDescriptorSizeAttribute] doubleValue] - defaultSize + ORKGetMetricForScreenType(ORKScreenMetricFontSizeSubheadline, screenType)];
+    return [UIFont systemFontOfSize:[[descriptor objectForKey:UIFontDescriptorSizeAttribute] doubleValue] - defaultSize + ORKGetMetricForWindow(ORKScreenMetricFontSizeSubheadline, nil)];
 }
 
 @end

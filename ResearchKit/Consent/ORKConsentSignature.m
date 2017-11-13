@@ -29,8 +29,9 @@
  */
 
 
-#import <ResearchKit/ORKConsentSignature.h>
-#import "ORKHelpers.h"
+#import "ORKConsentSignature.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKConsentSignature
@@ -66,15 +67,13 @@
     if (self) {
         _requiresName = YES;
         _requiresSignatureImage = YES;
-        self.identifier = [[NSUUID UUID] UUIDString];
+        self.identifier = [NSUUID UUID].UUIDString;
     }
     return self;
 }
 
 - (void)setIdentifier:(NSString *)identifier {
-    if ( nil == identifier) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"identifier can not be nil." userInfo:nil];
-    }
+    ORKThrowInvalidArgumentExceptionIfNil(identifier);
     
     _identifier = identifier;
 }
@@ -129,7 +128,7 @@
 }
 
 - (NSUInteger)hash {
-    return [_identifier hash] ^ [_title hash] ^ [_givenName hash] ^ [_familyName hash] ^ [_signatureDate hash];
+    return _identifier.hash ^ _title.hash ^ _givenName.hash ^ _familyName.hash ^ _signatureDate.hash;
 }
 
 - (instancetype)copyWithZone:(NSZone *)zone {

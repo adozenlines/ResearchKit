@@ -29,7 +29,7 @@
  */
 
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 #import "ORKAnswerTextField.h"
 
 
@@ -40,6 +40,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL allowsSelection; // Defaults to NO
 
 @property (nonatomic) BOOL hitClearButton;
+
+@end
+
+
+@interface ORKPasscodeTextField : ORKCaretOptionalTextField
+
+- (void)updateTextWithNumberOfFilledBullets:(NSInteger)filledBullets;
+
+@property (nonatomic) NSInteger numberOfDigits;
 
 @end
 
@@ -59,6 +68,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ORKTextFieldView : UIView
 
 @property (nonatomic, strong, readonly) ORKUnitTextField *textField;
+
+@property (nonatomic, readonly) CGFloat estimatedWidth;
 
 @end
 

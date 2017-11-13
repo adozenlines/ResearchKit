@@ -30,14 +30,15 @@
 
 
 #import "ORKScaleValueLabel.h"
-#import "ORKHelpers.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKScaleValueLabel
 
 + (UIFont *)defaultFont {
     UIFontDescriptor *descriptor = [UIFontDescriptor preferredFontDescriptorWithTextStyle:UIFontTextStyleHeadline];
-    return ORKLightFontWithSize([[descriptor objectForKey: UIFontDescriptorSizeAttribute] doubleValue]+18.0);
+    return ORKLightFontWithSize(((NSNumber *)[descriptor objectForKey: UIFontDescriptorSizeAttribute]).doubleValue + 18.0);
 }
 
 - (CGSize)intrinsicContentSize {

@@ -1,6 +1,7 @@
 /*
  Copyright (c) 2015, Apple Inc. All rights reserved.
- 
+ Copyright (c) 2015, Alex Basson. All rights reserved.
+
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
  
@@ -29,11 +30,17 @@
  */
 
 
-#import <ResearchKit/ResearchKit.h>
-#import <ResearchKit/ORKConsentSignature.h>
+@import Foundation;
+#import <ResearchKit/ORKDefines.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class ORKConsentSection;
+@class ORKConsentSectionFormatter;
+@class ORKConsentSignature;
+@class ORKConsentSignatureFormatter;
+@class ORKHTMLPDFWriter;
 
 /**
  The `ORKConsentDocument` class represents the content of an informed consent
@@ -90,7 +97,7 @@ ORK_CLASS_AVAILABLE
  
  The PDF file contains all sections.
  */
-@property (nonatomic, copy, nullable) NSArray *sections;
+@property (nonatomic, copy, nullable) NSArray<ORKConsentSection *> *sections;
 
 /// @name Signatures for consent review
 
@@ -115,7 +122,7 @@ ORK_CLASS_AVAILABLE
  needs to be modified to incorporate the new signature content prior to PDF
  generation. For more information, see `[ORKConsentSignatureResult applyToDocument:]`.
  */
-@property (nonatomic, copy, nullable) NSArray *signatures;
+@property (nonatomic, copy, nullable) NSArray<ORKConsentSignature *> *signatures;
 
 /**
  Adds a signature to the array of signatures.
@@ -141,6 +148,18 @@ ORK_CLASS_AVAILABLE
 /// @name PDF generation
 
 /**
+ Initializer with ORKHTMLPDFWriter parameter. Allows for injecting mock dependency for the
+ purposes of isolated unit testing.
+
+ @param writer              The instance of the ORKHTMLPDFWriter upon which the class depends.
+ @param sectionFormatter    An instance of ORKConsentSectionFormatter
+ @param signatureFormatter  An instance of ORKConsentSignatureFormatter
+ */
+- (instancetype)initWithHTMLPDFWriter:(ORKHTMLPDFWriter *)writer
+              consentSectionFormatter:(ORKConsentSectionFormatter *)sectionFormatter
+            consentSignatureFormatter:(ORKConsentSignatureFormatter *)signatureFormatter;
+
+/**
  Writes the document's content into a PDF file.
  
  The PDF is generated in a form suitable for printing. This is done asynchronously,
@@ -149,7 +168,7 @@ ORK_CLASS_AVAILABLE
  @param handler     The handler block for generated PDF data. When successful, the returned
                     data represents a complete PDF document that represents the consent.
  */
-- (void)makePDFWithCompletionHandler:(void (^)(NSData * __nullable PDFData, NSError * __nullable error))handler;
+- (void)makePDFWithCompletionHandler:(void (^)(NSData * _Nullable PDFData, NSError * _Nullable error))handler;
 
 @end
 

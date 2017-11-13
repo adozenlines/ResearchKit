@@ -30,9 +30,11 @@
 
 
 #import "ORKTouchRecorder.h"
+
 #import "ORKDataLogger.h"
+
 #import "ORKRecorder_Internal.h"
-#import "ORKRecorder_Private.h"
+
 #import "UITouch+ORKJSONDictionary.h"
 
 
@@ -80,7 +82,7 @@
 
 @interface ORKTouchRecordingView : UIView
 
-@property (nonatomic, weak) id<ORKTouchRecordingDelegate> deleagte;
+@property (nonatomic, weak) id<ORKTouchRecordingDelegate> delegate;
 
 @end
 
@@ -113,11 +115,11 @@
 }
 
 - (void)start {
-    if (! _logger) {
-        NSError *err = nil;
-        _logger = [self makeJSONDataLoggerWithError:&err];
-        if (! _logger) {
-            [self finishRecordingWithError:err];
+    if (!_logger) {
+        NSError *error = nil;
+        _logger = [self makeJSONDataLoggerWithError:&error];
+        if (!_logger) {
+            [self finishRecordingWithError:error];
             return;
         }
     }
@@ -193,17 +195,12 @@
         [self.touchArray addObject:touch];
     }
     
-    NSError *err = nil;
-    if (![_logger append:[touch ork_JSONDictionaryInView:view allTouches:self.touchArray] error:&err]) {
-        assert(err != nil);
-        [self finishRecordingWithError:err];
+    NSError *error = nil;
+    if (![_logger append:[touch ork_JSONDictionaryInView:view allTouches:self.touchArray] error:&error]) {
+        assert(error != nil);
+        [self finishRecordingWithError:error];
     }
 }
-
-@end
-
-
-@interface ORKTouchRecorderConfiguration ()
 
 @end
 

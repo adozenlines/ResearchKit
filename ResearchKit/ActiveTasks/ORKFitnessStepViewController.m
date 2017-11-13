@@ -30,19 +30,24 @@
 
 
 #import "ORKFitnessStepViewController.h"
-#import "ORKHelpers.h"
-#import "ORKStep_Private.h"
-#import "ORKStepViewController_Internal.h"
-#import "ORKActiveStepViewController_Internal.h"
+
+#import "ORKActiveStepTimer.h"
+#import "ORKActiveStepView.h"
 #import "ORKFitnessContentView.h"
 #import "ORKVerticalContainerView.h"
-#import "ORKFitnessStep.h"
+
+#import "ORKStepViewController_Internal.h"
 #import "ORKHealthQuantityTypeRecorder.h"
 #import "ORKPedometerRecorder.h"
-#import "ORKActiveStepView.h"
+
+#import "ORKActiveStepViewController_Internal.h"
+#import "ORKFitnessStep.h"
+#import "ORKStep_Private.h"
+
+#import "ORKHelpers_Internal.h"
 
 
-@interface ORKFitnessStepViewController () <ORKHealthQuantityTypeRecorderDelegate,ORKPedometerRecorderDelegate> {
+@interface ORKFitnessStepViewController () <ORKHealthQuantityTypeRecorderDelegate, ORKPedometerRecorderDelegate> {
     NSInteger _intendedSteps;
     ORKFitnessContentView *_contentView;
     NSNumberFormatter *_hrFormatter;

@@ -30,9 +30,12 @@
 
 
 #import "ORKValuePicker.h"
-#import "ORKResult_Private.h"
-#import "ORKChoiceAnswerFormatHelper.h"
+
 #import "ORKAnswerFormat_Internal.h"
+#import "ORKChoiceAnswerFormatHelper.h"
+#import "ORKResult_Private.h"
+
+#import "ORKAccessibilityFunctions.h"
 
 
 @interface ORKValuePicker () <UIPickerViewDataSource, UIPickerViewDelegate>
@@ -78,7 +81,7 @@
     
     NSNumber *indexNumber = [_helper selectedIndexForAnswer:answer];
     if (indexNumber) {
-        [_pickerView selectRow:[indexNumber unsignedIntegerValue] inComponent:0 animated:NO];
+        [_pickerView selectRow:indexNumber.unsignedIntegerValue inComponent:0 animated:NO];
     } else {
         [_pickerView selectRow:0 inComponent:0 animated:NO];
     }
@@ -94,7 +97,7 @@
     }
    
     NSNumber *indexNumber = [_helper selectedIndexForAnswer:_answer];
-    NSInteger row = [indexNumber integerValue];
+    NSInteger row = indexNumber.integerValue;
     
     if (row == 0) {
         return nil;
@@ -106,6 +109,7 @@
 - (void)pickerWillAppear {
     [self pickerView];
     [self valueDidChange];
+    [self accessibilityFocusOnPickerElement];
 }
 
 - (void)valueDidChange {
@@ -113,6 +117,19 @@
     _answer = [_helper answerForSelectedIndex:row];
     if ([self.pickerDelegate respondsToSelector:@selector(picker:answerDidChangeTo:)]) {
         [self.pickerDelegate picker:self answerDidChangeTo:_answer];
+    }
+}
+
+#pragma mark - Accessibility
+
+- (void)accessibilityFocusOnPickerElement {
+    if (UIAccessibilityIsVoiceOverRunning()) {
+        ORKAccessibilityPerformBlockAfterDelay(0.75, ^{
+            NSArray *axElements = [self.pickerView accessibilityElements];
+            if ([axElements count] > 0) {
+                UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, [axElements objectAtIndex:0]);
+            }
+        });
     }
 }
 

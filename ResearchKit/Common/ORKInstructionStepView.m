@@ -30,21 +30,27 @@
 
 
 #import "ORKInstructionStepView.h"
-#import "ORKInstructionStep.h"
-#import "ORKHelpers.h"
+
+#import "ORKStepHeaderView_Internal.h"
+#import "ORKTintedImageView.h"
 #import "ORKVerticalContainerView_Internal.h"
+
+#import "ORKNavigationContainerView_Internal.h"
+
+#import "ORKInstructionStep.h"
 #import "ORKCompletionStep.h"
 #import "ORKStep_Private.h"
+
+#import "ORKHelpers_Internal.h"
 #import "ORKSkin.h"
-#import "ORKTintedImageView.h"
-#import "ORKStepHeaderView_Internal.h"
-#import "ORKNavigationContainerView_Internal.h"
 
 
 @implementation ORKInstructionStepView {
+    ORKTintedImageView *_auxiliaryInstructionImageView;
     ORKTintedImageView *_instructionImageView;
+    UIView *_imageContainerView;
     BOOL _isCompletionStep;
-    NSLayoutConstraint *_instructionImageHeightConstraint;
+    NSLayoutConstraint *_imageContainerHeightConstraint;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame {
@@ -54,7 +60,17 @@
         _instructionImageView.translatesAutoresizingMaskIntoConstraints = NO;
         _instructionImageView.contentMode = UIViewContentModeScaleAspectFit;
         
-        self.stepView = _instructionImageView;
+        _auxiliaryInstructionImageView = [ORKTintedImageView new];
+        _auxiliaryInstructionImageView.translatesAutoresizingMaskIntoConstraints = NO;
+        _auxiliaryInstructionImageView.contentMode = UIViewContentModeScaleAspectFit;
+        _auxiliaryInstructionImageView.tintColor = ORKColor(ORKAuxiliaryImageTintColorKey);
+        
+        _imageContainerView = [[UIView alloc] initWithFrame:frame];
+        _imageContainerView.translatesAutoresizingMaskIntoConstraints = NO;
+        [_imageContainerView addSubview:_auxiliaryInstructionImageView];
+        [_imageContainerView addSubview:_instructionImageView];
+        
+        self.stepView = _imageContainerView;
     }
     return self;
 }
@@ -62,55 +78,83 @@
 - (void)setInstructionStep:(ORKInstructionStep *)instructionStep {
     _instructionStep = instructionStep;
     UIImage *image = _instructionStep.image;
+    UIImage *auxiliaryImage = _instructionStep.auxiliaryImage;
     BOOL hasImage = (image != nil);
+    BOOL hasFootnote = _instructionStep.footnote.length > 0;
     
     _isCompletionStep = [_instructionStep isKindOfClass:[ORKCompletionStep class]];
     
-    self.verticalCenteringEnabled = ! hasImage;
-    self.continueHugsContent = ! hasImage;
-    self.stepViewFillsAvailableSpace = (hasImage && ! _isCompletionStep);
+    self.verticalCenteringEnabled = !hasImage;
+    self.continueHugsContent = !hasImage && !hasFootnote;
+    self.stepViewFillsAvailableSpace = ((hasImage || hasFootnote) && !_isCompletionStep);
     
     _instructionImageView.image = image;
     _instructionImageView.shouldApplyTint = instructionStep.shouldTintImages;
+    _auxiliaryInstructionImageView.image = auxiliaryImage;
+    _auxiliaryInstructionImageView.shouldApplyTint = instructionStep.shouldTintImages;
+    
     CGSize imageSize = image.size;
     if (imageSize.width > 0 && imageSize.height > 0) {
-        [_instructionImageView removeConstraints:[_instructionImageView constraints]];
-        [_instructionImageView addConstraint:[NSLayoutConstraint constraintWithItem:_instructionImageView
-                                                                          attribute:NSLayoutAttributeHeight
-                                                                          relatedBy:NSLayoutRelationLessThanOrEqual
-                                                                             toItem:_instructionImageView
-                                                                          attribute:NSLayoutAttributeWidth
-                                                                         multiplier:imageSize.height/imageSize.width
-                                                                           constant:0]];
+        [NSLayoutConstraint deactivateConstraints:[_imageContainerView constraints]];
+        NSMutableArray *constraints = [NSMutableArray new];
+        [constraints addObject:[NSLayoutConstraint constraintWithItem:_imageContainerView
+                                                            attribute:NSLayoutAttributeHeight
+                                                            relatedBy:NSLayoutRelationLessThanOrEqual
+                                                               toItem:_imageContainerView
+                                                            attribute:NSLayoutAttributeWidth
+                                                           multiplier:imageSize.height / imageSize.width
+                                                             constant:0.0]];
         
-        _instructionImageHeightConstraint = [NSLayoutConstraint constraintWithItem:_instructionImageView
-                                                                         attribute:NSLayoutAttributeHeight
-                                                                         relatedBy:NSLayoutRelationLessThanOrEqual
-                                                                            toItem:nil
-                                                                         attribute:NSLayoutAttributeNotAnAttribute
-                                                                        multiplier:1.0
-                                                                          constant:300];
+        _imageContainerHeightConstraint = [NSLayoutConstraint constraintWithItem:_imageContainerView
+                                                                       attribute:NSLayoutAttributeHeight
+                                                                       relatedBy:NSLayoutRelationLessThanOrEqual
+                                                                          toItem:nil
+                                                                       attribute:NSLayoutAttributeNotAnAttribute
+                                                                      multiplier:1.0
+                                                                        constant:300.0];
         
-        [_instructionImageView addConstraint:_instructionImageHeightConstraint];
+        [constraints addObject:_imageContainerHeightConstraint];
+        
+        NSDictionary *views = NSDictionaryOfVariableBindings(_instructionImageView, _auxiliaryInstructionImageView);
+        [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_instructionImageView]|"
+                                                                                 options:0
+                                                                                 metrics:nil
+                                                                                   views:views]];
+        [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_instructionImageView]|"
+                                                                                 options:0
+                                                                                 metrics:nil
+                                                                                   views:views]];
+        [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_auxiliaryInstructionImageView]|"
+                                                                                 options:0
+                                                                                 metrics:nil
+                                                                                   views:views]];
+        [constraints addObjectsFromArray:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_auxiliaryInstructionImageView]|"
+                                                                                 options:0
+                                                                                 metrics:nil
+                                                                                   views:views]];
+        
+        [NSLayoutConstraint activateConstraints:constraints];
+        
         _instructionImageView.isAccessibilityElement = YES;
         _instructionImageView.accessibilityLabel = [NSString stringWithFormat:ORKLocalizedString(@"AX_IMAGE_ILLUSTRATION", nil), _instructionStep.title];
     } else {
         _instructionImageView.isAccessibilityElement = NO;
     }
     
+    self.headerView.iconImageView.image = _instructionStep.iconImage;
     self.headerView.captionLabel.text = _instructionStep.title;
     
     NSMutableAttributedString *attributedInstruction = [[NSMutableAttributedString alloc] init];
     NSString *detail = _instructionStep.detailText;
     NSString *text = _instructionStep.text;
-    detail = [detail length] ? detail : nil;
-    text = [text length] ? text : nil;
+    detail = detail.length ? detail : nil;
+    text = text.length ? text : nil;
     
     if (detail && text) {
         [attributedInstruction appendAttributedString:[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", text] attributes:nil]];
 
         NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
-        [style setParagraphSpacingBefore:self.headerView.instructionLabel.font.lineHeight*0.5];
+        [style setParagraphSpacingBefore:self.headerView.instructionLabel.font.lineHeight * 0.5];
         [style setAlignment:NSTextAlignmentCenter];
         
         NSAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:detail
@@ -123,6 +167,7 @@
     
     self.headerView.instructionLabel.attributedText = attributedInstruction;
     
+    self.continueSkipContainer.footnoteLabel.text = _instructionStep.footnote;
     [self.continueSkipContainer updateContinueAndSkipEnabled];
     
     [self tintColorDidChange];
@@ -130,16 +175,11 @@
     [self setNeedsUpdateConstraints];
 }
 
-- (void)updateConstraintConstants {
-    [super updateConstraintConstants];
+- (void)updateConstraintConstantsForWindow:(UIWindow *)window {
+    [super updateConstraintConstantsForWindow:window];
     
-    ORKScreenType screenType = self.screenType;
-    const CGFloat IllustrationHeight = ORKGetMetricForScreenType(ORKScreenMetricInstructionImageHeight, screenType);
-    
-    {
-        NSLayoutConstraint *constraint = _instructionImageHeightConstraint;
-        constraint.constant = (_instructionImageView.image ? IllustrationHeight : 0);
-    }
+    const CGFloat IllustrationHeight = ORKGetMetricForWindow(ORKScreenMetricInstructionImageHeight, window);
+    _imageContainerHeightConstraint.constant = (_instructionImageView.image ? IllustrationHeight : 0);
 }
 
 @end

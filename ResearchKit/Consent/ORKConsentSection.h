@@ -29,8 +29,8 @@
  */
 
 
-#import <UIKit/UIKit.h>
-#import <ResearchKit/ResearchKit.h>
+@import UIKit;
+#import <ResearchKit/ORKDefines.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -207,6 +207,19 @@ ORK_CLASS_AVAILABLE
  content; in a visual consent step, the content is displayed as Learn More content.
   */
 @property (nonatomic, copy, nullable) NSString *htmlContent;
+
+/**
+ The NSURL used to override the 'htmlContent' and 'consent' property if a document should be required.
+ 
+ This property is used to display a document when required by an authortity.
+ 
+ */
+@property (nonatomic, copy, nullable) NSURL *contentURL;
+
+/**
+ When set to YES, the section is omitted in a consent review step or in PDF file generation. This property is NO by default.
+ */
+@property (nonatomic) BOOL omitFromDocument;
 
 /**
  A custom illustration for the consent.

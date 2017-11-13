@@ -29,9 +29,8 @@
  */
 
 
-#import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
-#import <ResearchKit/ORKDefines.h>
+@import UIKit;
+#import "ORKDefines.h"
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -54,13 +53,34 @@ ORK_EXTERN NSString *const ORKDarkTintColorKey;
 /// Color used for caption text
 ORK_EXTERN NSString *const ORKCaptionTextColorKey;
 
-/// Caption used for a "blue" highlight
+/// Color used for a "blue" highlight
 ORK_EXTERN NSString *const ORKBlueHighlightColorKey;
 
-/// Return the color for a specified ORK..ColorKey
+/// Default color used for legend, title and text on ORKPieChartView
+ORK_EXTERN NSString *const ORKChartDefaultTextColorKey;
+
+/// Default color used for axes of ORKGraphChartView
+ORK_EXTERN NSString *const ORKGraphAxisColorKey;
+
+/// Default color used for titles on axes of ORKGraphChartView
+ORK_EXTERN NSString *const ORKGraphAxisTitleColorKey;
+
+/// Default color used for scrubber line of ORKGraphChartView
+ORK_EXTERN NSString *const ORKGraphScrubberLineColorKey;
+
+/// Default color used for scrubber thumb of ORKGraphChartView
+ORK_EXTERN NSString *const ORKGraphScrubberThumbColorKey;
+
+/// Default color used for reference line of ORKGraphChartView
+ORK_EXTERN NSString *const ORKGraphReferenceLineColorKey;
+
+/// Default color used for auxiliary image tint of ORKInstructionStepView
+ORK_EXTERN NSString *const ORKAuxiliaryImageTintColorKey;
+
+/// Return the color for a specified ORK...ColorKey
 UIColor *ORKColor(NSString *colorKey);
 
-/// Modify the color for a specified ORK..ColorKey. (for customization)
+/// Modify the color for a specified ORK...ColorKey. (for customization)
 void ORKColorSetColorForKey(NSString *key, UIColor *color);
 
 @interface UIColor (ORKColor)
@@ -72,6 +92,8 @@ void ORKColorSetColorForKey(NSString *key, UIColor *color);
 
 @end
 
+extern const CGFloat ORKScreenMetricMaxDimension;
+
 typedef NS_ENUM(NSInteger, ORKScreenMetric) {
     ORKScreenMetricTopToCaptionBaseline,
     ORKScreenMetricFontSizeHeadline,
@@ -79,6 +101,7 @@ typedef NS_ENUM(NSInteger, ORKScreenMetric) {
     ORKScreenMetricFontSizeSurveyHeadline,
     ORKScreenMetricMaxFontSizeSurveyHeadline,
     ORKScreenMetricFontSizeSubheadline,
+    ORKScreenMetricFontSizeFootnote,
     ORKScreenMetricCaptionBaselineToFitnessTimerTop,
     ORKScreenMetricCaptionBaselineToTappingLabelTop,
     ORKScreenMetricCaptionBaselineToInstructionBaseline,
@@ -91,8 +114,11 @@ typedef NS_ENUM(NSInteger, ORKScreenMetric) {
     ORKScreenMetricIllustrationToCaptionBaseline,
     ORKScreenMetricIllustrationHeight,
     ORKScreenMetricInstructionImageHeight,
+    ORKScreenMetricContinueButtonHeightRegular,
+    ORKScreenMetricContinueButtonHeightCompact,
     ORKScreenMetricContinueButtonWidth,
     ORKScreenMetricMinimumStepHeaderHeightForMemoryGame,
+    ORKScreenMetricMinimumStepHeaderHeightForTowerOfHanoiPuzzle,
     ORKScreenMetricTableCellDefaultHeight,
     ORKScreenMetricTextFieldCellHeight,
     ORKScreenMetricChoiceCellFirstBaselineOffsetFromTop,
@@ -101,8 +127,14 @@ typedef NS_ENUM(NSInteger, ORKScreenMetric) {
     ORKScreenMetricLearnMoreButtonSideMargin,
     ORKScreenMetricHeadlineSideMargin,
     ORKScreenMetricToolbarHeight,
-    ORKScreenMetricVerticalScaleHorizontalMargin,
+    ORKScreenMetricVerticalScaleHeight,
     ORKScreenMetricSignatureViewHeight,
+    ORKScreenMetricPSATKeyboardViewWidth,
+    ORKScreenMetricPSATKeyboardViewHeight,
+    ORKScreenMetricLocationQuestionMapHeight,
+    ORKScreenMetricTopToIconImageViewTop,
+    ORKScreenMetricIconImageViewToCaptionBaseline,
+    ORKScreenMetricVerificationTextBaselineToResendButtonBaseline,
     ORKScreenMetric_COUNT
 };
 
@@ -112,19 +144,19 @@ typedef NS_ENUM(NSInteger, ORKScreenType) {
     ORKScreenTypeiPhone5,
     ORKScreenTypeiPhone4,
     ORKScreenTypeiPad,
+    ORKScreenTypeiPad12_9,
     ORKScreenType_COUNT
 };
 
-ORKScreenType ORKGetScreenTypeForWindow(UIWindow *__nullable window);
-CGFloat ORKGetMetricForScreenType(ORKScreenMetric metric, ORKScreenType screenType);
-CGFloat ORKGetMetricForWindow(ORKScreenMetric metric, UIWindow *__nullable window);
+ORKScreenType ORKGetVerticalScreenTypeForWindow(UIWindow * _Nullable window);
+CGFloat ORKGetMetricForWindow(ORKScreenMetric metric, UIWindow * _Nullable window);
 
 CGFloat ORKStandardLeftMarginForTableViewCell(UIView *view);
-CGFloat ORKStandardHorizMarginForView(UIView *view);
+CGFloat ORKStandardHorizontalMarginForView(UIView *view);
 UIEdgeInsets ORKStandardLayoutMarginsForTableViewCell(UIView *view);
 UIEdgeInsets ORKStandardFullScreenLayoutMarginsForView(UIView *view);
 UIEdgeInsets ORKScrollIndicatorInsetsForScrollView(UIView *view);
-CGFloat ORKWidthForSignatureView(UIWindow *window);
+CGFloat ORKWidthForSignatureView(UIWindow * _Nullable window);
 
 void ORKUpdateScrollViewBottomInset(UIScrollView *scrollView, CGFloat bottomInset);
 

@@ -79,6 +79,11 @@
 
 }
 
+- (void)setEnabled:(BOOL)enabled {
+    [super setEnabled:enabled];
+    [self.titleLabel setEnabled:enabled];
+}
+
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -86,7 +91,7 @@
 + (UIFont *)defaultFont {
     // regular, 14
     UIFontDescriptor *descriptor = [UIFontDescriptor preferredFontDescriptorWithTextStyle:UIFontTextStyleCaption1];
-    return [UIFont systemFontOfSize:[[descriptor objectForKey: UIFontDescriptorSizeAttribute] doubleValue]+2.0];
+    return [UIFont systemFontOfSize:((NSNumber *)[descriptor objectForKey: UIFontDescriptorSizeAttribute]).doubleValue + 2.0];
 }
 
 - (CGSize)intrinsicContentSize {
@@ -112,6 +117,14 @@
                           labelSize.height+verticalPadding);
     }
     return [super intrinsicContentSize];
+}
+
+- (UIAccessibilityTraits)accessibilityTraits {
+    // prevent VoiceOver from speaking "dimmed" when transitioning between pages
+    if (self.isInTransition) {
+        return [super accessibilityTraits] & ~UIAccessibilityTraitNotEnabled;
+    }
+    return [super accessibilityTraits];
 }
 
 @end

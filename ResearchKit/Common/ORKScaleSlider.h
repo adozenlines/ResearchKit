@@ -29,15 +29,10 @@
  */
 
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 
-@protocol ORKScaleSliderLayoutWidthProvider <NSObject>
-
-@property (nonatomic, readonly) CGFloat sliderLayoutWidth;
-
-@end
-
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ORKScaleSlider : UISlider
 
@@ -47,6 +42,12 @@
 
 @property (nonatomic, assign, getter=isVertical) BOOL vertical;
 
-@property (nonatomic, weak, nullable) id<ORKScaleSliderLayoutWidthProvider> delegate;
+@property (nonatomic, copy, nullable) NSArray *textChoices;
+
+@property (nonatomic, copy, nullable) NSArray<UIColor *> *gradientColors;
+
+@property (nonatomic, copy, nullable) NSArray<NSNumber *> *gradientLocations;
 
 @end
+
+NS_ASSUME_NONNULL_END

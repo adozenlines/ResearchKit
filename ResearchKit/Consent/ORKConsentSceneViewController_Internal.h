@@ -29,13 +29,25 @@
  */
 
 
-#import "ORKStepViewController.h"
+#import "ORKConsentSceneViewController.h"
+#import "ORKVerticalContainerView.h"
+
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface ORKConsentSceneView : ORKVerticalContainerView
+
+@end
 
 
 @interface ORKConsentSceneViewController ()
+
+@property (nonatomic, readonly) ORKConsentSceneView *sceneView;
 
 @property (nonatomic, readonly) UIScrollView *scrollView;
 
 - (void)scrollToTopAnimated:(BOOL)animated completion:(void (^)(BOOL finished))completion;
 
 @end
+
+NS_ASSUME_NONNULL_END

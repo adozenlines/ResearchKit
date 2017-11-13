@@ -30,7 +30,8 @@
 
 
 #import "DynamicTask.h"
-#import <ResearchKit/ResearchKit_Private.h>
+
+@import ResearchKit.Private;
 
 
 @interface DynamicTask ()
@@ -45,7 +46,6 @@
 
 
 @implementation DynamicTask
-
 
 - (instancetype)init {
     self = [super init];
@@ -74,9 +74,9 @@
         return self.step2;
     } else if ([identifier isEqualToString:self.step2.identifier]) {
         ORKStepResult *stepResult = [result stepResultForStepIdentifier:step.identifier];
-        ORKQuestionResult *result = stepResult.results.count > 0 ? [stepResult.results firstObject] : nil;
+        ORKQuestionResult *result = (ORKQuestionResult *)(stepResult.results.count > 0 ? stepResult.results.firstObject : nil);
         if (result.answer != nil) {
-            if ([[(NSArray *)result.answer firstObject] isEqualToString:@"route1"])
+            if ([((NSArray *)result.answer).firstObject isEqualToString:@"route1"])
             {
                 return self.step3a;
             } else {
@@ -87,7 +87,7 @@
         ORKStepResult *stepResult = [result stepResultForStepIdentifier:step.identifier];
         ORKQuestionResult *result = (ORKQuestionResult *)[stepResult firstResult];
         if (result.answer != nil) {
-            if ([(NSNumber *)result.answer boolValue]) {
+            if (((NSNumber *)result.answer).boolValue) {
                 return self.step4;
             }
         }

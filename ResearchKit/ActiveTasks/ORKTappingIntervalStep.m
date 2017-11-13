@@ -30,6 +30,7 @@
 
 
 #import "ORKTappingIntervalStep.h"
+
 #import "ORKTappingIntervalStepViewController.h"
 
 
@@ -43,6 +44,7 @@
     self = [super initWithIdentifier:identifier];
     if (self) {
         self.shouldShowDefaultTimer = NO;
+        self.optional = NO; // default to *not* optional
     }
     return self;
 }
@@ -53,7 +55,7 @@
     NSTimeInterval const ORKTwoFingerTappingMinimumDuration = 5.0;
     
     if ( self.stepDuration < ORKTwoFingerTappingMinimumDuration) {
-        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:[NSString stringWithFormat:@"duration can not be shorter than %@ seconds.", @(ORKTwoFingerTappingMinimumDuration)]  userInfo:nil];
+        @throw [NSException exceptionWithName:NSInvalidArgumentException reason:[NSString stringWithFormat:@"duration cannot be shorter than %@ seconds.", @(ORKTwoFingerTappingMinimumDuration)]  userInfo:nil];
     }
 }
 

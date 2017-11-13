@@ -30,9 +30,13 @@
 
 
 #import "ORKConsentSharingStep.h"
+
 #import "ORKConsentSharingStepViewController.h"
-#import "ORKHelpers.h"
+
 #import "ORKStep_Private.h"
+
+#import "ORKAnswerFormat.h"
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKConsentSharingStep
@@ -55,24 +59,24 @@
      localizedLearnMoreHTMLContent:(NSString *)localizedLearnMoreHTMLContent {
     self = [super initWithIdentifier:identifier];
     if (self) {
-        if ( [investigatorShortDescription length] == 0 ) {
+        if ( investigatorShortDescription.length == 0 ) {
             @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"investigatorShortDescription should not be empty." userInfo:nil];
         }
-        if ( [investigatorLongDescription length] == 0 ) {
+        if ( investigatorLongDescription.length == 0 ) {
             @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"investigatorLongDescription should not be empty." userInfo:nil];
         }
-        if ( [localizedLearnMoreHTMLContent length] == 0 ) {
+        if ( localizedLearnMoreHTMLContent.length == 0 ) {
             @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"localizedLearnMoreHTMLContent should not be empty." userInfo:nil];
         }
         
         self.answerFormat = [ORKAnswerFormat choiceAnswerFormatWithStyle:ORKChoiceAnswerStyleSingleChoice textChoices:
-                             @[[ORKTextChoice choiceWithText:[NSString stringWithFormat:ORKLocalizedString(@"CONSENT_SHARE_WIDELY_%@",nil), investigatorShortDescription] detailText:nil value:@(YES)],
-                               [ORKTextChoice choiceWithText:[NSString stringWithFormat:ORKLocalizedString(@"CONSENT_SHARE_ONLY_%@",nil), investigatorLongDescription] detailText:nil value:@(NO)],
+                             @[[ORKTextChoice choiceWithText:[NSString localizedStringWithFormat:ORKLocalizedString(@"CONSENT_SHARE_WIDELY_%@",nil), investigatorShortDescription] value:@(YES)],
+                               [ORKTextChoice choiceWithText:[NSString localizedStringWithFormat:ORKLocalizedString(@"CONSENT_SHARE_ONLY_%@",nil), investigatorLongDescription] value:@(NO)],
                                ]];
         self.optional = NO;
         self.useSurveyMode = NO;
         self.title = ORKLocalizedString(@"CONSENT_SHARING_TITLE", nil);
-        self.text = [NSString stringWithFormat:ORKLocalizedString(@"CONSENT_SHARING_DESCRIPTION_%@", nil), investigatorLongDescription];
+        self.text = [NSString localizedStringWithFormat:ORKLocalizedString(@"CONSENT_SHARING_DESCRIPTION_%@", nil), investigatorLongDescription];
         
         self.localizedLearnMoreHTMLContent = localizedLearnMoreHTMLContent;
     }

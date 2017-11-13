@@ -29,30 +29,76 @@
  */
 
 
-#import <ResearchKit/ORKDefines.h>
+#import <ResearchKit/ORKTypes.h>
+
+#import <ResearchKit/ORKStep.h>
+#import <ResearchKit/ORKActiveStep.h>
+#import <ResearchKit/ORKConsentReviewStep.h>
+#import <ResearchKit/ORKConsentSharingStep.h>
+#import <ResearchKit/ORKFormStep.h>
+#import <ResearchKit/ORKImageCaptureStep.h>
+#import <ResearchKit/ORKInstructionStep.h>
+#import <ResearchKit/ORKLoginStep.h>
+#import <ResearchKit/ORKNavigablePageStep.h>
+#import <ResearchKit/ORKPageStep.h>
+#import <ResearchKit/ORKPasscodeStep.h>
+#import <ResearchKit/ORKQuestionStep.h>
+#import <ResearchKit/ORKRegistrationStep.h>
+#import <ResearchKit/ORKReviewStep.h>
+#import <ResearchKit/ORKSignatureStep.h>
+#import <ResearchKit/ORKTableStep.h>
+#import <ResearchKit/ORKTouchAnywhereStep.h>
+#import <ResearchKit/ORKVerificationStep.h>
+#import <ResearchKit/ORKVideoCaptureStep.h>
+#import <ResearchKit/ORKVisualConsentStep.h>
+#import <ResearchKit/ORKWaitStep.h>
+#import <ResearchKit/ORKVideoInstructionStep.h>
 
 #import <ResearchKit/ORKTask.h>
 #import <ResearchKit/ORKOrderedTask.h>
-#import <ResearchKit/ORKStep.h>
-#import <ResearchKit/ORKQuestionStep.h>
-#import <ResearchKit/ORKInstructionStep.h>
-#import <ResearchKit/ORKFormStep.h>
+#import <ResearchKit/ORKNavigableOrderedTask.h>
+#import <ResearchKit/ORKStepNavigationRule.h>
 
 #import <ResearchKit/ORKAnswerFormat.h>
 #import <ResearchKit/ORKHealthAnswerFormat.h>
 
 #import <ResearchKit/ORKResult.h>
+#import <ResearchKit/ORKResultPredicate.h>
 
-#import <ResearchKit/ORKTaskViewController.h>
+#import <ResearchKit/ORKTextButton.h>
+#import <ResearchKit/ORKBorderedButton.h>
+#import <ResearchKit/ORKContinueButton.h>
+
 #import <ResearchKit/ORKStepViewController.h>
-
-#import <ResearchKit/ORKConsentDocument.h>
-#import <ResearchKit/ORKConsentSignature.h>
-#import <ResearchKit/ORKConsentSection.h>
-#import <ResearchKit/ORKVisualConsentStep.h>
-#import <ResearchKit/ORKConsentReviewStep.h>
-#import <ResearchKit/ORKConsentSharingStep.h>
+#import <ResearchKit/ORKActiveStepViewController.h>
+#import <ResearchKit/ORKCompletionStepViewController.h>
+#import <ResearchKit/ORKFormStepViewController.h>
+#import <ResearchKit/ORKInstructionStepViewController.h>
+#import <ResearchKit/ORKLoginStepViewController.h>
+#import <ResearchKit/ORKPageStepViewController.h>
+#import <ResearchKit/ORKPasscodeViewController.h>
+#import <ResearchKit/ORKQuestionStepViewController.h>
+#import <ResearchKit/ORKTableStepViewController.h>
+#import <ResearchKit/ORKTaskViewController.h>
+#import <ResearchKit/ORKTouchAnywhereStepViewController.h>
+#import <ResearchKit/ORKVerificationStepViewController.h>
+#import <ResearchKit/ORKWaitStepViewController.h>
 
 #import <ResearchKit/ORKRecorder.h>
-#import <ResearchKit/ORKActiveStep.h>
-#import <ResearchKit/ORKActiveStepViewController.h>
+
+#import <ResearchKit/ORKConsentDocument.h>
+#import <ResearchKit/ORKConsentSection.h>
+#import <ResearchKit/ORKConsentSignature.h>
+
+#import <ResearchKit/ORKKeychainWrapper.h>
+
+#import <ResearchKit/ORKChartTypes.h>
+#import <ResearchKit/ORKBarGraphChartView.h>
+#import <ResearchKit/ORKDiscreteGraphChartView.h>
+#import <ResearchKit/ORKLineGraphChartView.h>
+#import <ResearchKit/ORKPieChartView.h>
+
+#import <ResearchKit/ORKDataCollectionManager.h>
+#import <ResearchKit/ORKCollector.h>
+
+#import <ResearchKit/ORKDeprecated.h>

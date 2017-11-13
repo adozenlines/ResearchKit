@@ -30,20 +30,30 @@
 
 
 #import "ORKStep.h"
-#import "ORKHelpers.h"
 #import "ORKStep_Private.h"
+
 #import "ORKStepViewController.h"
+
 #import "ORKOrderedTask.h"
+#import "ORKStepViewController_Internal.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKStep
 
++ (instancetype)new {
+    ORKThrowMethodUnavailableException();
+}
+
+- (instancetype)init {
+    ORKThrowMethodUnavailableException();
+}
+
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     self = [super init];
     if (self) {
-        if (nil == identifier) {
-            @throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"identifier can not be nil." userInfo:nil];
-        }
+        ORKThrowInvalidArgumentExceptionIfNil(identifier);
         _identifier = [identifier copy];
     }
     return self;
@@ -53,9 +63,31 @@
     return [ORKStepViewController class];
 }
 
+- (Class)stepViewControllerClass {
+    return [[self class] stepViewControllerClass];
+}
+
+- (ORKStepViewController *)instantiateStepViewControllerWithResult:(ORKResult *)result {
+    Class stepViewControllerClass = [self stepViewControllerClass];
+    
+    ORKStepViewController *stepViewController = [[stepViewControllerClass alloc] initWithStep:self result:result];
+    
+    // Set the restoration info using the given class
+    stepViewController.restorationIdentifier = self.identifier;
+    stepViewController.restorationClass = stepViewControllerClass;
+    
+    return stepViewController;
+}
+
+- (instancetype)copyWithIdentifier:(NSString *)identifier {
+    ORKThrowInvalidArgumentExceptionIfNil(identifier)
+    ORKStep *step = [self copy];
+    step->_identifier = [identifier copy];
+    return step;
+}
+
 - (instancetype)copyWithZone:(NSZone *)zone {
-    ORKStep *step = [[[self class] allocWithZone:zone] init];
-    step->_identifier = [_identifier copy];
+    ORKStep *step = [[[self class] allocWithZone:zone] initWithIdentifier:[_identifier copy]];
     step.title = _title;
     step.optional = _optional;
     step.text = _text;
@@ -81,7 +113,7 @@
 
 - (NSUInteger)hash {
     // Ignore the task reference - it's not part of the content of the step.
-    return [_identifier hash] ^ [_title hash] ^ [_text hash] ^ (_optional ? 0xf : 0x0);
+    return _identifier.hash ^ _title.hash ^ _text.hash ^ (_optional ? 0xf : 0x0);
 }
 
 + (BOOL)supportsSecureCoding {
@@ -114,9 +146,8 @@
     }
 }
 
-
 - (NSString *)description {
-    return [NSString stringWithFormat:@"<%@ %@ %@>", [super description], self.identifier, self.title];
+    return [NSString stringWithFormat:@"<%@ %@ %@>", super.description, self.identifier, self.title];
 }
 
 - (BOOL)showsProgress {
@@ -133,6 +164,14 @@
 
 - (void)validateParameters {
     
+}
+
+- (ORKPermissionMask)requestedPermissions {
+    return ORKPermissionNone;
+}
+
+- (NSSet<HKObjectType *> *)requestedHealthKitTypesForReading {
+    return nil;
 }
 
 @end

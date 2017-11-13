@@ -30,15 +30,16 @@
  */
 
 
+@import UIKit;
+@import HealthKit;
 #import <ResearchKit/ORKDefines.h>
-#import <ResearchKit/ORKStep.h>
-#import <HealthKit/HealthKit.h>
-#import <ResearchKit/ORKResult.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class ORKRecorder;
+@class ORKResult;
+@class ORKStep;
 
 /**
  The `ORKRecorderConfiguration` class is the abstract base class for recorder configurations
@@ -59,7 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
 ORK_CLASS_AVAILABLE
 @interface ORKRecorderConfiguration : NSObject <NSSecureCoding>
 
-/**
+/*
  The `init` and `new` methods are unavailable outside the framework on `ORKRecorderConfiguration`,
  because it is an abstract class.
  
@@ -104,7 +105,7 @@ ORK_CLASS_AVAILABLE
  If your recorder requires or would benefit from read access to HealthKit at
  runtime during the task, return the appropriate set of `HKSampleType` objects.
  */
-- (nullable NSSet *)requestedHealthKitTypesForReading;
+- (nullable NSSet<HKObjectType *> *)requestedHealthKitTypesForReading;
 
 @end
 

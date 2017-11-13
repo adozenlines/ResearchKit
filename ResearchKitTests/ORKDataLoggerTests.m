@@ -29,10 +29,8 @@
  */
 
 
-#import <XCTest/XCTest.h>
-#import "ORKDataLogger.h"
-#import "ORKDataLogger_Private.h"
-#import "ORKHelpers.h"
+@import XCTest;
+@import ResearchKit.Private;
 
 
 @interface ORKDataLoggerTests : XCTestCase <ORKDataLoggerDelegate> {
@@ -45,12 +43,13 @@
 
 @end
 
+
 @implementation ORKDataLoggerTests
 
 - (void)setUp {
     [super setUp];
     
-    _directory = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]] isDirectory:YES];
+    _directory = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSUUID UUID].UUIDString] isDirectory:YES];
     
     BOOL success = [[NSFileManager defaultManager] createDirectoryAtURL:_directory withIntermediateDirectories:YES attributes:nil error:nil];
     XCTAssertTrue(success, @"Create log directory");
@@ -110,11 +109,11 @@
 }
 
 - (void)testJSONFormatting {
-    NSDictionary *jsonObject = @{@"test" : @[@"a", @"b"], @"blah" : @(1) };
+    NSDictionary *jsonObject = @{@"test": @[@"a", @"b"], @"blah": @(1) };
     
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     
-    XCTAssertEqual([_finishedLogFiles count], 1);
+    XCTAssertEqual(_finishedLogFiles.count, 1);
     
     NSError *error = nil;
     NSDictionary *jsonOut = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:_finishedLogFiles[0]] options:(NSJSONReadingOptions)0 error:&error];
@@ -143,18 +142,18 @@
     } error:nil];
     XCTAssertEqual(count, 1);
     
-    NSDictionary *jsonOut = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:[_finishedLogFiles lastObject]] options:(NSJSONReadingOptions)0 error:nil];
+    NSDictionary *jsonOut = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:_finishedLogFiles.lastObject] options:(NSJSONReadingOptions)0 error:nil];
     XCTAssertEqualObjects(jsonOut[@"items"][0][@"val"], @(1));
     XCTAssertEqualObjects(jsonOut[@"items"][1][@"val"], @(2));
 }
 
 - (void)testRemoveAllFiles {
-    NSDictionary *jsonObject = @{@"test" : @(1) };
-    NSDictionary *jsonObject2 = @{@"test" : @(2) };
+    NSDictionary *jsonObject = @{@"test": @(1) };
+    NSDictionary *jsonObject2 = @{@"test": @(2) };
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject2];
     
-    XCTAssertEqual([_finishedLogFiles count], 2);
+    XCTAssertEqual(_finishedLogFiles.count, 2);
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
     XCTAssertTrue([fileManager fileExistsAtPath:[(NSURL *)_finishedLogFiles[0] path]]);
@@ -169,12 +168,12 @@
     
     NSArray *logs = [self allLogsWithError:&error];
     XCTAssertNil(error);
-    XCTAssertEqual([logs count], 0);
+    XCTAssertEqual(logs.count, 0);
 }
 
 - (void)testMarkFileUploaded {
-    NSDictionary *jsonObject = @{@"test" : @(1) };
-    NSDictionary *jsonObject2 = @{@"test" : @(2) };
+    NSDictionary *jsonObject = @{@"test": @(1) };
+    NSDictionary *jsonObject2 = @{@"test": @(2) };
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject2];
     
@@ -199,7 +198,7 @@
     XCTAssertFalse([_dataLogger isFileUploadedAtURL:_finishedLogFiles[1]]);
 }
 
-- (NSArray *)allLogsWithError:(NSError * __autoreleasing *)error {
+- (NSArray *)allLogsWithError:(NSError **)error {
     NSMutableArray *logs = [NSMutableArray array];
     [_dataLogger enumerateLogs:^(NSURL *logFileUrl, BOOL *stop) {
         [logs addObject:logFileUrl];
@@ -207,7 +206,7 @@
     return logs;
 }
 
-- (NSArray *)logsUploaded:(BOOL)uploaded withError:(NSError * __autoreleasing *)error {
+- (NSArray *)logsUploaded:(BOOL)uploaded withError:(NSError **)error {
     NSMutableArray *logs = [NSMutableArray array];
     if (uploaded) {
         [_dataLogger enumerateLogsAlreadyUploaded:^(NSURL *logFileUrl, BOOL *stop) {
@@ -222,21 +221,21 @@
 }
 
 - (void)testFileEnumerators {
-    NSDictionary *jsonObject = @{@"test" : @(1) };
-    NSDictionary *jsonObject2 = @{@"test" : @(2) };
+    NSDictionary *jsonObject = @{@"test": @(1) };
+    NSDictionary *jsonObject2 = @{@"test": @(2) };
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject2];
     
-    XCTAssertEqual([_finishedLogFiles count], 2);
+    XCTAssertEqual(_finishedLogFiles.count, 2);
     {
         NSError *error = nil;
         NSArray *uploaded = [self logsUploaded:YES withError:&error];
         XCTAssertNil(error);
-        XCTAssertEqual([uploaded count], 0);
+        XCTAssertEqual(uploaded.count, 0);
         
         NSArray *needUpload = [self logsUploaded:NO withError:&error];
         XCTAssertNil(error);
-        XCTAssertEqual([needUpload count], 2);
+        XCTAssertEqual(needUpload.count, 2);
     }
     
     {
@@ -246,7 +245,7 @@
         
         NSArray *uploaded = [self logsUploaded:YES withError:&error];
         XCTAssertNil(error);
-        XCTAssertEqual([uploaded count], 1);
+        XCTAssertEqual(uploaded.count, 1);
         XCTAssertEqualObjects(uploaded, @[_finishedLogFiles[0]]);
         
         NSArray *needUpload = [self logsUploaded:NO withError:&error];
@@ -258,7 +257,7 @@
 - (void)testDataProtection {
     _dataLogger.fileProtectionMode = ORKFileProtectionComplete;
     
-    NSDictionary *jsonObject = @{@"test" : @(1) };
+    NSDictionary *jsonObject = @{@"test": @(1) };
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     NSError *error = nil;
     XCTAssertTrue([_dataLogger append:jsonObject error:&error]);
@@ -266,13 +265,13 @@
     
     NSArray *logs= [self allLogsWithError:&error];
     XCTAssertNil(error);
-    XCTAssertEqual([logs count], 1);
+    XCTAssertEqual(logs.count, 1);
     
     NSDictionary *jsonOut = [NSJSONSerialization JSONObjectWithData:[NSData dataWithContentsOfURL:logs[0]] options:(NSJSONReadingOptions)0 error:&error];
     XCTAssertNil(error);
     XCTAssertEqualObjects(jsonOut[@"items"][0], jsonObject);
     
-#if ! TARGET_IPHONE_SIMULATOR
+#if !TARGET_IPHONE_SIMULATOR
     {
         NSDictionary *attribs = [[NSFileManager defaultManager] attributesOfItemAtPath:[[_dataLogger currentLogFileURL] path] error:&error];
         XCTAssertNil(error);
@@ -290,19 +289,19 @@
     _dataLogger.maximumCurrentLogFileSize = 50;
     NSFileManager *fileManager = [NSFileManager defaultManager];
     
-    NSDictionary *jsonObject = @{@"x" : @"1234567890"};
+    NSDictionary *jsonObject = @{@"x": @"1234567890"};
     [self logJsonObject:jsonObject];
     [self logJsonObject:jsonObject];
     
     [self wait];
     
     XCTAssertTrue([[fileManager attributesOfItemAtPath:[[_dataLogger currentLogFileURL] path] error:nil] fileSize] < 50);
-    XCTAssertEqual([_finishedLogFiles count], 0);
+    XCTAssertEqual(_finishedLogFiles.count, 0);
     
     [self logJsonObject:jsonObject];
     [self wait];
     XCTAssertTrue([[fileManager attributesOfItemAtPath:[[_dataLogger currentLogFileURL] path] error:nil] fileSize] < 50);
-    XCTAssertEqual([_finishedLogFiles count], 1);
+    XCTAssertEqual(_finishedLogFiles.count, 1);
     
     XCTAssertTrue([[fileManager attributesOfItemAtPath:[(NSURL *)_finishedLogFiles[0] path] error:nil] fileSize] >= 50);
     XCTAssertTrue([[fileManager attributesOfItemAtPath:[[_dataLogger currentLogFileURL] path] error:nil] fileSize] < 50);
@@ -310,7 +309,7 @@
 
 - (void)testFirstWriteOpensFilehandle {
     XCTAssertNil([_dataLogger fileHandle]);
-    NSDictionary *jsonObject = @{@"x" : @"1234567890"};
+    NSDictionary *jsonObject = @{@"x": @"1234567890"};
     [self logJsonObject:jsonObject];
     XCTAssertNotNil([_dataLogger fileHandle]);
 }
@@ -320,7 +319,7 @@
     [_dataLogger finishCurrentLog];
     XCTAssertNil([_dataLogger fileHandle]);
     [self wait];
-    XCTAssertEqual([_finishedLogFiles count], 0);
+    XCTAssertEqual(_finishedLogFiles.count, 0);
 }
 
 - (void)testExplicitRolloverWithZeroLengthFile {
@@ -328,13 +327,13 @@
     NSDictionary *jsonObject = @{};
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
     XCTAssertNil([_dataLogger fileHandle]);
-    XCTAssertEqual([_finishedLogFiles count], 1);
+    XCTAssertEqual(_finishedLogFiles.count, 1);
     [self logJsonObjectAndRolloverAndWaitOnce:jsonObject];
-    XCTAssertEqual([_finishedLogFiles count], 2);
+    XCTAssertEqual(_finishedLogFiles.count, 2);
 }
 
 - (void)testCurrentLogFileAlwaysHasValidJson {
-    NSDictionary *jsonObject = @{@"x" : @"1234567890"};
+    NSDictionary *jsonObject = @{@"x": @"1234567890"};
     [self logJsonObject:jsonObject];
     {
         NSError *error = nil;

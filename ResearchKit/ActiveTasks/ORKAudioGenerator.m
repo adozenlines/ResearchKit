@@ -49,15 +49,15 @@
  3. This notice may not be removed or altered from any source distribution.
  */
 
+
 #import "ORKAudioGenerator.h"
 
 @import AudioToolbox;
 
-@interface ORKAudioGenerator () {
-    @public
-    AudioComponentInstance _toneUnit;
 
-@public
+@interface ORKAudioGenerator () {
+  @public
+    AudioComponentInstance _toneUnit;
     double _frequency;
     double _theta;
     ORKAudioChannel _activeChannel;
@@ -103,8 +103,7 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
         bufferActive[frame] = bufferValue;
         if (audioGenerator->_playsStereo) {
             bufferNonActive[frame] = bufferValue;
-        }
-        else {
+        } else {
             bufferNonActive[frame] = 0;
         }
 
@@ -113,7 +112,7 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
             theta -= 2.0 * M_PI;
         }
 
-        fadeInFactor += 1/(ORKSineWaveToneGeneratorSampleRateDefault * audioGenerator->_fadeInDuration);
+        fadeInFactor += 1.0 / (ORKSineWaveToneGeneratorSampleRateDefault * audioGenerator->_fadeInDuration);
         if (fadeInFactor >= 1) {
             fadeInFactor = 1;
         }
@@ -133,8 +132,32 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
     self = [super init];
     if (self) {
         [self setupAudioSession];
+        
+        // Automatically stop and then restart audio playback when the app resigns active.
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive:) name:UIApplicationWillResignActiveNotification object:nil];
     }
     return self;
+}
+
+- (void)dealloc {
+    [self stop];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    if (_toneUnit) {
+        __unused OSErr error = AudioOutputUnitStart(_toneUnit);
+        NSAssert1(error == noErr, @"Error starting unit: %hd", error);
+    }
+}
+
+- (void)applicationWillResignActive:(NSNotification *)notification {
+    if (_toneUnit) {
+        __unused OSErr error = AudioOutputUnitStop(_toneUnit);
+        NSAssert1(error == noErr, @"Error stopping unit: %hd", error);
+    }
 }
 
 - (double)volumeInDecibels {
@@ -171,12 +194,12 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
         [self createToneUnit];
 
         // Stop changing parameters on the unit
-        OSErr err = AudioUnitInitialize(_toneUnit);
-        NSAssert1(err == noErr, @"Error initializing unit: %hd", err);
+        OSErr error = AudioUnitInitialize(_toneUnit);
+        NSAssert1(error == noErr, @"Error initializing unit: %hd", error);
 
         // Start playback
-        err = AudioOutputUnitStart(_toneUnit);
-        NSAssert1(err == noErr, @"Error starting unit: %hd", err);
+        error = AudioOutputUnitStart(_toneUnit);
+        NSAssert1(error == noErr, @"Error starting unit: %hd", error);
     }
 }
 
@@ -217,20 +240,20 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
     NSAssert(defaultOutput, @"Can't find default output");
 
     // Create a new unit based on this that we'll use for output
-    OSErr err = AudioComponentInstanceNew(defaultOutput, &_toneUnit);
-    NSAssert1(_toneUnit, @"Error creating unit: %hd", err);
+    OSErr error = AudioComponentInstanceNew(defaultOutput, &_toneUnit);
+    NSAssert1(_toneUnit, @"Error creating unit: %hd", error);
 
     // Set our tone rendering function on the unit
     AURenderCallbackStruct input;
     input.inputProc = ORKAudioGeneratorRenderTone;
     input.inputProcRefCon = (__bridge void *)(self);
-    err = AudioUnitSetProperty(_toneUnit,
+    error = AudioUnitSetProperty(_toneUnit,
                                kAudioUnitProperty_SetRenderCallback,
                                kAudioUnitScope_Input,
                                0,
                                &input,
                                sizeof(input));
-    NSAssert1(err == noErr, @"Error setting callback: %hd", err);
+    NSAssert1(error == noErr, @"Error setting callback: %hd", error);
 
     // Set the format to 32 bit, single channel, floating point, linear PCM
     const int four_bytes_per_float = 4;
@@ -244,13 +267,13 @@ OSStatus ORKAudioGeneratorRenderTone(void *inRefCon,
     streamFormat.mBytesPerFrame = four_bytes_per_float;
     streamFormat.mChannelsPerFrame = 2;
     streamFormat.mBitsPerChannel = four_bytes_per_float * eight_bits_per_byte;
-    err = AudioUnitSetProperty (_toneUnit,
+    error = AudioUnitSetProperty (_toneUnit,
                                 kAudioUnitProperty_StreamFormat,
                                 kAudioUnitScope_Input,
                                 0,
                                 &streamFormat,
                                 sizeof(AudioStreamBasicDescription));
-    NSAssert1(err == noErr, @"Error setting stream format: %hd", err);
+    NSAssert1(error == noErr, @"Error setting stream format: %hd", error);
 }
 
 - (void)handleInterruption:(id)sender {

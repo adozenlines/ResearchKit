@@ -29,12 +29,13 @@
  */
 
 
-#import <ResearchKit/ORKDefines.h>
+@import Foundation;
 #import <ResearchKit/ORKStep.h>
-#import <ResearchKit/ORKAnswerFormat.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class ORKAnswerFormat;
 
 /**
  The `ORKQuestionStep` class is a concrete subclass of `ORKStep` that represents
@@ -66,6 +67,19 @@ ORK_CLASS_AVAILABLE
  */
 + (instancetype)questionStepWithIdentifier:(NSString *)identifier
                                      title:(nullable NSString *)title
+                                    answer:(nullable ORKAnswerFormat *)answerFormat;
+
+/**
+ Returns a new question step that includes the specified identifier, title, text, and answer format.
+ 
+ @param identifier    The identifier of the step (a step identifier should be unique within the task).
+ @param title         A localized string that represents the primary text of the question.
+ @param text          A localized string that represents the additional text of the question.
+ @param answerFormat  The format in which the answer is expected.
+ */
++ (instancetype)questionStepWithIdentifier:(NSString *)identifier
+                                     title:(nullable NSString *)title
+                                      text:(nullable NSString *)text
                                     answer:(nullable ORKAnswerFormat *)answerFormat;
 
 /**

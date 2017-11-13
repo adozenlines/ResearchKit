@@ -29,16 +29,21 @@
  */
 
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  The `ORKSpatialSpanGame` class represents a model object that represents one game-like experience in a spatial span memory task.
  
- A game consists of a subset of a permutation of the integers [0 .. gameSize-1],
+ A game consists of a subset of a permutation of the integers [0 .. gameSize - 1],
  which represent the sequence of targets that should be tapped.
  */
 @interface ORKSpatialSpanGame : NSObject
+
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  Returns an initialized spatial span game using the specified game size, sequence length, and seed.
@@ -78,3 +83,5 @@
 - (NSInteger)tileIndexForStep:(NSInteger)step;
 
 @end
+
+NS_ASSUME_NONNULL_END

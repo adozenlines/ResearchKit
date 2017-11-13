@@ -30,8 +30,10 @@
 
 
 #import "ORKTimeIntervalPicker.h"
+
 #import "ORKAnswerFormat_Internal.h"
-#import "ORKHelpers.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @interface ORKDatePicker : UIDatePicker
@@ -85,7 +87,7 @@
     if (_pickerView == nil) {
         _pickerView = [[ORKDatePicker alloc] init];
         _pickerView.datePickerMode = UIDatePickerModeCountDownTimer;
-        [_pickerView addTarget:self action:@selector(valueChanged:) forControlEvents:UIControlEventValueChanged];
+        [_pickerView addTarget:self action:@selector(valueDidChange:) forControlEvents:UIControlEventValueChanged];
         [self setAnswerFormat:_answerFormat];
         [self setAnswer:_answer];
     }
@@ -97,7 +99,7 @@
     
     NSTimeInterval value;
     if (answer != nil && answer != ORKNullAnswerValue()  && [answer isKindOfClass:[NSNumber class]]) {
-        value = [(NSNumber *)answer doubleValue];
+        value = ((NSNumber *)answer).doubleValue;
     } else {
         value = [_answerFormat pickerDefaultDuration];
     }
@@ -113,15 +115,15 @@
 }
 
 - (NSString *)selectedLabelText {
-    return  (_answer == nil || _answer == ORKNullAnswerValue())? nil : [ORKTimeIntervalLabelFormatter() stringFromTimeInterval: [self.answer floatValue]];
+    return  (_answer == nil || _answer == ORKNullAnswerValue()) ? nil : [ORKTimeIntervalLabelFormatter() stringFromTimeInterval:((NSNumber *)self.answer).floatValue];
 }
 
 - (void)pickerWillAppear {
     [self pickerView];
-    [self valueChanged:nil];
+    [self valueDidChange:nil];
 }
 
-- (void)valueChanged:(id)sender {
+- (void)valueDidChange:(id)sender {
     NSTimeInterval interval = _pickerView.countDownDuration;
     _answer = @(interval);
     

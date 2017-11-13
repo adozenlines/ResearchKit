@@ -29,22 +29,25 @@
  */
 
 
-#import <AVFoundation/AVFoundation.h>
-
-#import "ORKVisualConsentTransitionAnimator.h"
-#import "ORKVisualConsentStepViewController.h"
-#import "ORKHelpers.h"
+@import AVFoundation;
 
 #import "ORKEAGLMoviePlayerView.h"
+
 #import "ORKVisualConsentStepViewController_Internal.h"
+#import "ORKVisualConsentTransitionAnimator.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 // Internal object to hold the direction we're animating, the phase of the animation, and the animation completion handler.
 @interface ORKVisualConsentAnimationContext : NSObject
 
 @property (nonatomic, assign) UIPageViewControllerNavigationDirection direction;
+
 @property (nonatomic, assign) BOOL hasCalledLoadHandler;
+
 @property (nonatomic, copy) ORKVisualConsentAnimationCompletionHandler handler;
+
 @property (nonatomic, copy) ORKVisualConsentAnimationCompletionHandler loadHandler;
 
 @property (nonatomic, strong) NSValue *startTime;
@@ -170,7 +173,7 @@
         if (([keyPath isEqualToString:@"status"] && object == _moviePlayer) ||
             ([keyPath isEqualToString:@"duration"] && object == _playerItem)) {
             if (_moviePlayer.error) {
-                ORK_Log_Debug(@"%@", _moviePlayer.error);
+                ORK_Log_Warning(@"%@", _moviePlayer.error);
             }
             
             [self attemptAnimationWithContext:animationContext];
@@ -199,8 +202,8 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackDidFinish:) name:AVPlayerItemPlaybackStalledNotification object:[_moviePlayer currentItem]];
     
     __weak AVPlayer *weakPlayer = _moviePlayer;
-    [_moviePlayer seekToTime:[context.startTime CMTimeValue]
-             toleranceBefore:CMTimeMake(NSEC_PER_SEC*1/60, NSEC_PER_SEC) toleranceAfter:CMTimeMake(NSEC_PER_SEC*1/60, NSEC_PER_SEC)  completionHandler:^(BOOL finished) {
+    [_moviePlayer seekToTime:context.startTime.CMTimeValue
+             toleranceBefore:CMTimeMake(NSEC_PER_SEC * (1.0 / 60.0), NSEC_PER_SEC) toleranceAfter:CMTimeMake(NSEC_PER_SEC * (1.0 / 60.0), NSEC_PER_SEC)  completionHandler:^(BOOL finished) {
                  AVPlayer *localPlayer = weakPlayer;
                  [localPlayer play];
              }];
@@ -229,7 +232,7 @@
     ORKEAGLMoviePlayerView *playerView = [_stepViewController animationPlayerView];
     playerView.hidden = NO;
     
-    if (_pendingContext && ! _pendingContext.hasCalledLoadHandler) {
+    if (_pendingContext && !_pendingContext.hasCalledLoadHandler) {
         if (_pendingContext.loadHandler) {
             _pendingContext.loadHandler(self, _pendingContext.direction);
         }

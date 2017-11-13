@@ -30,9 +30,13 @@
 
 
 #import "ORKQuestionStepView.h"
+
+#import "ORKCustomStepView.h"
 #import "ORKNavigationContainerView_Internal.h"
-#import "ORKQuestionStep_Internal.h"
+#import "ORKStepHeaderView_Internal.h"
+
 #import "ORKStep_Private.h"
+#import "ORKQuestionStep_Internal.h"
 
 
 @implementation ORKQuestionStepView
@@ -46,7 +50,7 @@
 - (void)setQuestionStep:(ORKQuestionStep *)step {
     self.continueSkipContainer.useNextForSkip = (step ? NO : YES);
     _questionStep = step;
-    self.headerView.instructionLabel.hidden = ! [[_questionStep text] length];
+    self.headerView.instructionLabel.hidden = ![_questionStep text].length;
     
     self.headerView.captionLabel.useSurveyMode = step.useSurveyMode;
     self.headerView.captionLabel.text = _questionStep.title;

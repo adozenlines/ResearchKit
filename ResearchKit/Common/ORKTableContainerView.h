@@ -29,8 +29,7 @@
  */
 
 
-#import <UIKit/UIKit.h>
-#import <ResearchKit/ResearchKit.h>
+@import UIKit;
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -56,7 +55,15 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) ORKStepHeaderView *stepHeaderView;
 @property (nonatomic, strong, readonly) ORKNavigationContainerView *continueSkipContainerView;
 
+/*
+ If tap off events should be accepted from outside this view's bounds, provide
+ the parent view where the tap off gesture recognizer should be attached.
+ */
+@property (nonatomic, weak, nullable) UIView *tapOffView;
+
 - (void)scrollCellVisible:(UITableViewCell *)cell animated:(BOOL)animated;
+    
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
 
 @end
 

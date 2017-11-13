@@ -30,24 +30,29 @@
 
 
 #import "ORKSpatialSpanMemoryStepViewController.h"
-#import "ORKHelpers.h"
-#import "ORKActiveStep_Internal.h"
-#import "ORKStep_Private.h"
-#import "ORKActiveStepViewController_Internal.h"
+
+#import "ORKActiveStepView.h"
 #import "ORKSpatialSpanMemoryContentView.h"
-#import "ORKVerticalContainerView.h"
+#import "ORKVerticalContainerView_Internal.h"
+
+#import "ORKActiveStepViewController_Internal.h"
 #import "ORKStepViewController_Internal.h"
+#import "ORKStepHeaderView_Internal.h"
+
+#import "ORKActiveStep_Internal.h"
+#import "ORKResult.h"
+#import "ORKStep_Private.h"
 #import "ORKSpatialSpanGame.h"
 #import "ORKSpatialSpanGameState.h"
-#import "ORKVerticalContainerView_Internal.h"
-#import "ORKSkin.h"
-#import "ORKResult.h"
-#import <QuartzCore/CABase.h>
 #import "ORKSpatialSpanMemoryStep.h"
-#import "ORKActiveStepView.h"
+
+#import "ORKHelpers_Internal.h"
+#import "ORKSkin.h"
+
+#import <QuartzCore/CABase.h>
 
 
-static const NSTimeInterval kMemoryGameActivityTimeout = 20;
+static const NSTimeInterval MemoryGameActivityTimeout = 20;
 
 typedef NS_ENUM(NSInteger, ORKSpatialSpanStepState) {
     ORKSpatialSpanStepStateInitial,
@@ -86,7 +91,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 @end
 
 
-@implementation ORKState;
+@implementation ORKState
 
 + (ORKState *)stateWithState:(NSInteger)state entryHandler:(_ORKStateHandler)entryHandler exitHandler:(_ORKStateHandler)exitHandler context:(id)context {
     ORKState *s = [ORKState new];
@@ -112,6 +117,8 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     ORKGridSize _gridSize;
     
     ORKSpatialSpanGameState *_currentGameState;
+    UIBarButtonItem *_customLearnMoreButtonItem;
+    UIBarButtonItem *_learnMoreButtonItem;
     
     // ORKSpatialSpanMemoryGameRecord
     NSMutableArray *_gameRecords;
@@ -146,6 +153,13 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 #pragma mark Overrides
 
 - (void)viewDidLoad {
+    
+    // Setup to always have a learn more button item but with an empty title
+    BOOL usesDefaultCopyright = (self.learnMoreButtonItem == nil);
+    if (usesDefaultCopyright) {
+        self.learnMoreButtonItem = [[UIBarButtonItem alloc] initWithTitle:ORKLocalizedString(@"BUTTON_COPYRIGHT", nil) style:UIBarButtonItemStylePlain target:self action:@selector(showCopyright)];
+    }
+    
     [super viewDidLoad];
     
     _contentView = [ORKSpatialSpanMemoryContentView new];
@@ -160,6 +174,10 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleUserTap:)];
     [self.activeStepView addGestureRecognizer:tapGestureRecognizer];
+    
+    if (usesDefaultCopyright) {
+        self.activeStepView.headerView.learnMoreButton.alpha = 0;
+    }
 }
 
 - (void)stepDidChange {
@@ -172,7 +190,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 - (void)start {
     [super start];
     
-    if (! _state) {
+    if (!_state) {
         [self transitionToState:ORKSpatialSpanStepStateInitial];
     }
     
@@ -245,7 +263,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 #pragma mark UpdateGameRecord
 
 - (ORKSpatialSpanMemoryGameRecord *)currentGameRecord {
-    return _gameRecords? [_gameRecords lastObject] : nil;
+    return _gameRecords ? _gameRecords.lastObject : nil;
 }
 
 - (void)createGameRecord {
@@ -341,7 +359,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 #pragma mark ORKSpatialSpanStepStateInitial
 
 - (ORKGridSize)gridSizeForSpan:(NSInteger)span {
-    NSInteger numberOfGridEntriesDesired = span*2;
+    NSInteger numberOfGridEntriesDesired = span * 2;
     NSInteger value = (NSInteger)ceil(sqrt(numberOfGridEntriesDesired));
     value = MAX(value, 2);
     value = MIN(value, 6);
@@ -377,7 +395,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     NSInteger sequenceLength = _nextGameSequenceLength;
     _gridSize = [self gridSizeForSpan:sequenceLength];
     
-    ORKSpatialSpanGame *game = [[ORKSpatialSpanGame alloc] initWithGameSize:_gridSize.width*_gridSize.height sequenceLength:sequenceLength seed:0];
+    ORKSpatialSpanGame *game = [[ORKSpatialSpanGame alloc] initWithGameSize:_gridSize.width * _gridSize.height sequenceLength:sequenceLength seed:0];
     ORKSpatialSpanGameState *gameState = [[ORKSpatialSpanGameState alloc] initWithGame:game];
     
     _currentGameState = gameState;
@@ -413,7 +431,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
         ORKSpatialSpanMemoryStep *step = [self spatialSpanStep];
         
         NSInteger index = _playbackIndex;
-        NSInteger previousIndex = index-1;
+        NSInteger previousIndex = index - 1;
         if (step.requireReversal) {
             // Play the indexes in reverse order when we require reversal. The participant
             // is then required to tap the sequence in the forward direction, which
@@ -426,7 +444,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
         [self applyTargetState:ORKSpatialSpanTargetStateQuiescent toSequenceIndex:previousIndex duration:0];
         
         // The active display should be visible for half the timer interval
-        [self applyTargetState:ORKSpatialSpanTargetStateActive toSequenceIndex:index duration:step.playSpeed/2];
+        [self applyTargetState:ORKSpatialSpanTargetStateActive toSequenceIndex:index duration:(step.playSpeed / 2)];
     }
     _playbackIndex++;
 }
@@ -436,7 +454,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     _contentView.footerHidden = YES;
     _contentView.buttonItem = nil;
     ORKSpatialSpanMemoryStep *step = [self spatialSpanStep];
-    NSString *title = [NSString stringWithFormat:ORKLocalizedString(@"MEMORY_GAME_PLAYBACK_TITLE_%@", nil), step.customTargetPluralName ? : ORKLocalizedString(@"SPATIAL_SPAN_MEMORY_TARGET_PLURAL", nil)];
+    NSString *title = [NSString localizedStringWithFormat:ORKLocalizedString(@"MEMORY_GAME_PLAYBACK_TITLE_%@", nil), step.customTargetPluralName ? : ORKLocalizedString(@"SPATIAL_SPAN_MEMORY_TARGET_PLURAL", nil)];
     
     [self.activeStepView updateTitle:title text:nil];
     
@@ -471,7 +489,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     [_activityTimer invalidate];
     _activityTimer = nil;
     
-    _activityTimer = [NSTimer scheduledTimerWithTimeInterval:kMemoryGameActivityTimeout target:self selector:@selector(activityTimeout) userInfo:nil repeats:NO];
+    _activityTimer = [NSTimer scheduledTimerWithTimeInterval:MemoryGameActivityTimeout target:self selector:@selector(activityTimeout) userInfo:nil repeats:NO];
 }
 
 - (void)startGameplay {
@@ -522,8 +540,8 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
             [gameView setState:ORKSpatialSpanTargetStateCorrect forTileIndex:tileIndex animated:YES];
             NSInteger stepIndex = [_currentGameState currentStepIndex];
             
-            [self setNumberOfItems:_numberOfItems+1];
-            [self setScore:_score + (round(log2(stepIndex))+1)*5];
+            [self setNumberOfItems:_numberOfItems + 1];
+            [self setScore:_score + (round(log2(stepIndex)) + 1) * 5];
             
             [self resetActivityTimer];
             if ([_currentGameState isComplete]) {
@@ -544,7 +562,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
     ORKSpatialSpanMemoryStep *step = [self spatialSpanStep];
     if (success) {
         NSInteger sequenceLength = [_currentGameState.game sequenceLength];
-        [self setScore:_score + (round(log2(sequenceLength))+1)*5];
+        [self setScore:_score + (round(log2(sequenceLength)) + 1) * 5];
         _gamesCounter++;
         _consecutiveGamesFailed = 0;
         _nextGameSequenceLength = MIN(_nextGameSequenceLength + 1, step.maximumSpan);
@@ -557,7 +575,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 
 - (void)continueAction {
     ORKSpatialSpanMemoryStep *step = [self spatialSpanStep];
-    if (_gamesCounter < step.maxTests && _consecutiveGamesFailed < step.maxConsecutiveFailures) {
+    if (_gamesCounter < step.maximumTests && _consecutiveGamesFailed < step.maximumConsecutiveFailures) {
         // Generate a new game
         [self transitionToState:ORKSpatialSpanStepStateRestart];
         UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
@@ -591,7 +609,7 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 
 - (BOOL)finishIfCompletedGames {
     ORKSpatialSpanMemoryStep *step = [self spatialSpanStep];
-    if (_consecutiveGamesFailed >= step.maxConsecutiveFailures || _gamesCounter >= step.maxTests) {
+    if (_consecutiveGamesFailed >= step.maximumConsecutiveFailures || _gamesCounter >= step.maximumTests) {
         [self transitionToState:ORKSpatialSpanStepStateComplete];
         return YES;
     }
@@ -630,9 +648,22 @@ typedef void (^_ORKStateHandler)(ORKState *fromState, ORKState *_toState, id con
 - (void)showComplete {
     [self.activeStepView updateTitle:ORKLocalizedString(@"MEMORY_GAME_COMPLETE_TITLE", nil) text:nil];
     
+    // Show the copyright
+    self.activeStepView.headerView.learnMoreButton.alpha = 1;
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.75 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         _contentView.buttonItem = [[UIBarButtonItem alloc] initWithTitle:ORKLocalizedString(@"BUTTON_NEXT", nil) style:UIBarButtonItemStylePlain target:self action:@selector(continueAction)];
     });
+}
+
+- (void)showCopyright {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
+                                                                   message:ORKLocalizedString(@"MEMORY_GAME_COPYRIGHT_TEXT", nil)
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:ORKLocalizedString(@"BUTTON_OK", nil)
+                                              style:UIAlertActionStyleDefault
+                                            handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 #pragma mark ORKSpatialSpanStepStateRestart

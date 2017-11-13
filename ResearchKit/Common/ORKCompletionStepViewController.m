@@ -30,11 +30,17 @@
 
 
 #import "ORKCompletionStepViewController.h"
-#import "ORKStepViewController_Internal.h"
-#import "ORKInstructionStepViewController_Internal.h"
-#import "ORKVerticalContainerView.h"
-#import "ORKVerticalContainerView_Internal.h"
+
+#import "ORKCustomStepView_Internal.h"
+#import "ORKInstructionStepView.h"
+#import "ORKNavigationContainerView.h"
 #import "ORKStepHeaderView_Internal.h"
+#import "ORKVerticalContainerView_Internal.h"
+
+#import "ORKInstructionStepViewController_Internal.h"
+#import "ORKStepViewController_Internal.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @interface ORKCompletionStepView : ORKActiveStepCustomView
@@ -55,13 +61,13 @@ static const CGFloat TickViewSize = 122;
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.layer.cornerRadius = TickViewSize/2;
+        self.layer.cornerRadius = TickViewSize / 2;
         [self tintColorDidChange];
         
         UIBezierPath *path = [UIBezierPath new];
-        [path moveToPoint:(CGPoint){37,65}];
-        [path addLineToPoint:(CGPoint){50,78}];
-        [path addLineToPoint:(CGPoint){87,42}];
+        [path moveToPoint:(CGPoint){37, 65}];
+        [path addLineToPoint:(CGPoint){50, 78}];
+        [path addLineToPoint:(CGPoint){87, 42}];
         path.lineCapStyle = kCGLineCapRound;
         path.lineWidth = 5;
     
@@ -77,7 +83,7 @@ static const CGFloat TickViewSize = 122;
         [self.layer addSublayer:shapeLayer];
         _shapeLayer = shapeLayer;
         
-        [self setTranslatesAutoresizingMaskIntoConstraints:NO];
+        self.translatesAutoresizingMaskIntoConstraints = NO;
     }
     return self;
 }
@@ -140,6 +146,9 @@ static const CGFloat TickViewSize = 122;
     [super stepDidChange];
     
     _completionStepView = [ORKCompletionStepView new];
+    if (self.checkmarkColor) {
+        _completionStepView.tintColor = self.checkmarkColor;
+    }
     
     self.stepView.stepView = _completionStepView;
     
@@ -160,17 +169,37 @@ static const CGFloat TickViewSize = 122;
     
     UILabel *captionLabel = self.stepView.headerView.captionLabel;
     UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, captionLabel);
-    _completionStepView.accessibilityLabel = [NSString stringWithFormat:ORKLocalizedString(@"AX_IMAGE_ILLUSTRATION", nil), captionLabel.accessibilityLabel];
+    _completionStepView.accessibilityLabel = [NSString localizedStringWithFormat:ORKLocalizedString(@"AX_IMAGE_ILLUSTRATION", nil), captionLabel.accessibilityLabel];
+}
+
+- (void)setCheckmarkColor:(UIColor *)checkmarkColor {
+    _checkmarkColor = [checkmarkColor copy];
+    _completionStepView.tintColor = checkmarkColor;
+}
+
+- (void)setShouldShowContinueButton:(BOOL)shouldShowContinueButton {
+    _shouldShowContinueButton = shouldShowContinueButton;
+    
+    // Update button states
+    [self setContinueButtonItem:self.continueButtonItem];
+    [self updateNavRightBarButtonItem];
 }
 
 // Override top right bar button item
 - (void)updateNavRightBarButtonItem {
-    self.navigationItem.rightBarButtonItem = self.continueButtonItem;
+    if (self.shouldShowContinueButton) {
+        self.navigationItem.rightBarButtonItem = nil;
+    }
+    else {
+        self.navigationItem.rightBarButtonItem = self.continueButtonItem;
+    }
 }
 
 - (void)setContinueButtonItem:(UIBarButtonItem *)continueButtonItem {
     [super setContinueButtonItem:continueButtonItem];
-    self.stepView.continueSkipContainer.continueButtonItem = nil;
+    if (!self.shouldShowContinueButton) {
+        self.stepView.continueSkipContainer.continueButtonItem = nil;
+    }
     [self updateNavRightBarButtonItem];
 }
 

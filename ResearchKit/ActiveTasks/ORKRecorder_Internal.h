@@ -29,17 +29,12 @@
  */
 
 
-#import <ResearchKit/ORKRecorder.h>
+#import "ORKRecorder_Private.h"
 
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class ORKDataLogger;
-
-@interface ORKRecorderConfiguration ()
-
-@end
-
 
 @interface ORKRecorder ()
 
@@ -53,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSString *)recorderType;
 
-- (nullable ORKDataLogger *)makeJSONDataLoggerWithError:(NSError * __autoreleasing *)error NS_REQUIRES_SUPER;
+- (nullable ORKDataLogger *)makeJSONDataLoggerWithError:(NSError * _Nullable *)error NS_REQUIRES_SUPER;
 
 - (void)reset NS_REQUIRES_SUPER;
 

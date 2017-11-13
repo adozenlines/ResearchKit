@@ -30,8 +30,10 @@
 
 
 #import "ORKSurveyAnswerCellForPicker.h"
-#import "ORKQuestionStep_Internal.h"
+
 #import "ORKPicker.h"
+
+#import "ORKQuestionStep_Internal.h"
 
 
 @interface ORKSurveyAnswerCellForPicker () <ORKPickerDelegate, UIPickerViewDelegate> {
@@ -40,7 +42,6 @@
 }
 
 @property (nonatomic, strong) id<ORKPicker> picker;
-@property (nonatomic, strong) NSMutableArray *customConstraints;
 
 @end
 
@@ -51,10 +52,12 @@
     [super prepareView];
     
     // Add a temporary picker view to show the lines the date picker will have
-    if (! _tempPicker && ! self.picker) {
+    if (!_tempPicker && !self.picker) {
         _tempPicker = [UIPickerView new];
         _tempPicker.delegate = self;
         [self addSubview:_tempPicker];
+        
+        [self addHorizontalHuggingConstraintForView:_tempPicker];
     }
     
     _valueChangedDueUserAction = NO;
@@ -68,10 +71,11 @@
         
         [self addSubview:_picker.pickerView];
         
+        // Removing _tempPicker automatically removes its constraints
         [_tempPicker removeFromSuperview];
         _tempPicker = nil;
         
-        [self setNeedsUpdateConstraints];
+        [self addHorizontalHuggingConstraintForView:_picker.pickerView];
     }
 }
 
@@ -80,39 +84,25 @@
     
     if (_picker) {
         CGSize pickerSize = [_picker.pickerView sizeThatFits:(CGSize){self.bounds.size.width,CGFLOAT_MAX}];
+        pickerSize.width = MIN(pickerSize.width, self.bounds.size.width);
         _picker.pickerView.frame = (CGRect){{0,0}, pickerSize};
     }
     
     if (_tempPicker) {
         CGSize pickerSize = [_tempPicker sizeThatFits:(CGSize){self.bounds.size.width,CGFLOAT_MAX}];
+        pickerSize.width = MIN(pickerSize.width, self.bounds.size.width);
         _tempPicker.frame = (CGRect){{0,0}, pickerSize};
     }
-}
-
-- (void)updateConstraints {
-    [self removeConstraints:_customConstraints];
-    [_customConstraints removeAllObjects];
-
-    if (!_customConstraints) {
-        _customConstraints = [NSMutableArray new];
-    }
-    
-    [self addHorizontalHuggingConstraintForView:_tempPicker];
-    [self addHorizontalHuggingConstraintForView:_picker.pickerView];
-    
-    [super updateConstraints];
 }
 
 - (void)addHorizontalHuggingConstraintForView:(UIView *)view {
     if (view) {
         view.translatesAutoresizingMaskIntoConstraints = NO;
-        
         NSArray *constraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[view]|"
                                                                        options:NSLayoutFormatDirectionLeadingToTrailing
                                                                        metrics:nil
                                                                          views:@{ @"view": view }];
-        [self addConstraints:constraints];
-        [_customConstraints addObjectsFromArray:constraints];
+        [NSLayoutConstraint activateConstraints:constraints];
     }
 }
 

@@ -30,9 +30,12 @@
 
 
 #import "ORKWalkingTaskStep.h"
-#import "ORKHelpers.h"
+
 #import "ORKWalkingTaskStepViewController.h"
+
 #import "ORKStep_Private.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKWalkingTaskStep
@@ -56,7 +59,7 @@
     
     if ( self.numberOfStepsPerLeg < ORKShortWalkTaskMinimumNumberOfStepsPerLeg) {
         @throw [NSException exceptionWithName:NSInvalidArgumentException
-                                       reason:[NSString stringWithFormat:@"numberOfStepsPerLeg can not be less than %@.", @(ORKShortWalkTaskMinimumNumberOfStepsPerLeg)]
+                                       reason:[NSString stringWithFormat:@"numberOfStepsPerLeg cannot be less than %@.", @(ORKShortWalkTaskMinimumNumberOfStepsPerLeg)]
                                      userInfo:nil];
     }
 }

@@ -31,18 +31,19 @@
 
 #import "ORKVoiceEngine.h"
 #import "ORKVoiceEngine_Internal.h"
-#import "ORKHelpers.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation ORKVoiceEngine
 
 + (ORKVoiceEngine *)sharedVoiceEngine {
-    static ORKVoiceEngine *shared;
+    static ORKVoiceEngine *sharedVoiceEngine;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        shared = [ORKVoiceEngine new];
+        sharedVoiceEngine = [ORKVoiceEngine new];
     });
-    return shared;
+    return sharedVoiceEngine;
 }
 
 - (instancetype)init {
@@ -71,8 +72,12 @@
     }
     
     AVSpeechUtterance *utterance = [[AVSpeechUtterance alloc] initWithString:text];
-    utterance.rate = AVSpeechUtteranceMaximumSpeechRate / 7;
-
+    float speechRate = AVSpeechUtteranceDefaultSpeechRate;
+    if (![[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){.majorVersion = 9, .minorVersion = 0, .patchVersion = 0}]) {
+        speechRate = AVSpeechUtteranceDefaultSpeechRate / 2.5;
+    }
+    utterance.rate = speechRate;
+    
     [self.speechSynthesizer speakUtterance:utterance];
 }
 

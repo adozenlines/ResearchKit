@@ -29,20 +29,11 @@
  */
 
 
-#import <XCTest/XCTest.h>
-#import <ResearchKit/ResearchKit.h>
-#import <CoreLocation/CoreLocation.h>
-#import "ORKLocationRecorder.h"
-#import "ORKAccelerometerRecorder.h"
-#import "ORKDeviceMotionRecorder.h"
-#import "ORKPedometerRecorder.h"
-#import "ORKTouchRecorder.h"
-#import "ORKAudioRecorder.h"
-#import "ORKHealthQuantityTypeRecorder.h"
-#import <CoreMotion/CoreMotion.h>
-#import "ORKHelpers.h"
-#import "ORKRecorder_Internal.h"
-#import "ORKRecorder_Private.h"
+@import XCTest;
+@import ResearchKit.Private;
+
+@import CoreLocation;
+@import CoreMotion;
 
 
 @interface ORKMockLocationManager : CLLocationManager
@@ -391,7 +382,7 @@ static const NSInteger kNumberOfSamples = 5;
     XCTAssertNil(error, @"");
     XCTAssertNotNil(dict, @"");
     
-    NSArray* items = dict[@"items"];
+    NSArray *items = dict[@"items"];
     XCTAssertEqual(items.count, kNumberOfSamples, @"");
     
     _items = items;
@@ -419,6 +410,8 @@ static const NSInteger kNumberOfSamples = 5;
     double speed = 15.0;
     NSDate *timestamp = [NSDate date];
     
+    CLLocationManager *currentLocationManager = [recorder locationManager];
+    
     for (NSInteger i = 0; i < kNumberOfSamples; i++) {
         CLLocation *location = [[CLLocation alloc] initWithCoordinate:CLLocationCoordinate2DMake(latitude, longitude)
                                                              altitude:altitude
@@ -428,7 +421,7 @@ static const NSInteger kNumberOfSamples = 5;
                                                                 speed:speed
                                                             timestamp:timestamp];
         
-        [clDelegate locationManager:nil didUpdateLocations:@[location]];
+        [clDelegate locationManager:currentLocationManager didUpdateLocations:@[location]];
     }
     
     [recorder stop];
@@ -436,14 +429,14 @@ static const NSInteger kNumberOfSamples = 5;
 
     for (NSDictionary *sample in _items) {
         
-        XCTAssertTrue(ork_doubleEqual(altitude, [sample[@"altitude"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(horizontalAccuracy, [sample[@"horizontalAccuracy"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(verticalAccuracy, [sample[@"verticalAccuracy"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(course, [sample[@"course"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(speed, [sample[@"speed"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(altitude, ((NSNumber *)sample[@"altitude"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(horizontalAccuracy, ((NSNumber *)sample[@"horizontalAccuracy"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(verticalAccuracy, ((NSNumber *)sample[@"verticalAccuracy"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(course, ((NSNumber *)sample[@"course"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(speed, ((NSNumber *)sample[@"speed"]).doubleValue), @"");
         XCTAssertEqualObjects(ORKStringFromDateISO8601(timestamp), sample[@"timestamp"], @"");
-        XCTAssertTrue(ork_doubleEqual(latitude, [sample[@"coordinate"][@"latitude"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(longitude, [sample[@"coordinate"][@"longitude"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(latitude, ((NSNumber *)sample[@"coordinate"][@"latitude"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(longitude, ((NSNumber *)sample[@"coordinate"][@"longitude"]).doubleValue), @"");
     }
 }
 
@@ -472,10 +465,10 @@ static const NSInteger kNumberOfSamples = 5;
     [self checkResult];
     
     for (NSDictionary *sample in _items) {
-        XCTAssertTrue(ork_doubleEqual(data.timestamp, [sample[@"timestamp"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(data.acceleration.x, [sample[@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(data.acceleration.y, [sample[@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(data.acceleration.z, [sample[@"z"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(data.timestamp, ((NSNumber *)sample[@"timestamp"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(data.acceleration.x, ((NSNumber *)sample[@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(data.acceleration.y, ((NSNumber *)sample[@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(data.acceleration.z, ((NSNumber *)sample[@"z"]).doubleValue), @"");
     }
 }
 
@@ -503,29 +496,29 @@ static const NSInteger kNumberOfSamples = 5;
     [self checkResult];
     
     for (NSDictionary *sample in _items) {
-        XCTAssertTrue(ork_doubleEqual(motion.timestamp, [sample[@"timestamp"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.timestamp, ((NSNumber *)sample[@"timestamp"]).doubleValue), @"");
         
-        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.x, [sample[@"attitude"][@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.y, [sample[@"attitude"][@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.z, [sample[@"attitude"][@"z"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.w, [sample[@"attitude"][@"w"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.x, ((NSNumber *)sample[@"attitude"][@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.y, ((NSNumber *)sample[@"attitude"][@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.z, ((NSNumber *)sample[@"attitude"][@"z"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.attitude.quaternion.w, ((NSNumber *)sample[@"attitude"][@"w"]).doubleValue), @"");
         
-        XCTAssertTrue(ork_doubleEqual(motion.gravity.x, [sample[@"gravity"][@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.gravity.y, [sample[@"gravity"][@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.gravity.z, [sample[@"gravity"][@"z"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.gravity.x, ((NSNumber *)sample[@"gravity"][@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.gravity.y, ((NSNumber *)sample[@"gravity"][@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.gravity.z, ((NSNumber *)sample[@"gravity"][@"z"]).doubleValue), @"");
         
-        XCTAssertTrue(ork_doubleEqual(motion.magneticField.accuracy, [sample[@"magneticField"][@"accuracy"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.x, [sample[@"magneticField"][@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.y, [sample[@"magneticField"][@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.z, [sample[@"magneticField"][@"z"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.magneticField.accuracy, ((NSNumber *)sample[@"magneticField"][@"accuracy"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.x, ((NSNumber *)sample[@"magneticField"][@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.y, ((NSNumber *)sample[@"magneticField"][@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.magneticField.field.z, ((NSNumber *)sample[@"magneticField"][@"z"]).doubleValue), @"");
         
-        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.x, [sample[@"rotationRate"][@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.y, [sample[@"rotationRate"][@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.z, [sample[@"rotationRate"][@"z"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.x, ((NSNumber *)sample[@"rotationRate"][@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.y, ((NSNumber *)sample[@"rotationRate"][@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.rotationRate.z, ((NSNumber *)sample[@"rotationRate"][@"z"]).doubleValue), @"");
         
-        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.x, [sample[@"userAcceleration"][@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.y, [sample[@"userAcceleration"][@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.z, [sample[@"userAcceleration"][@"z"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.x, ((NSNumber *)sample[@"userAcceleration"][@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.y, ((NSNumber *)sample[@"userAcceleration"][@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(motion.userAcceleration.z, ((NSNumber *)sample[@"userAcceleration"][@"z"]).doubleValue), @"");
     }
 }
 
@@ -556,10 +549,10 @@ static const NSInteger kNumberOfSamples = 5;
         XCTAssertEqualObjects(ORKStringFromDateISO8601(data.startDate), sample[@"startDate"], @"");
         XCTAssertEqualObjects(ORKStringFromDateISO8601(data.endDate), sample[@"endDate"], @"");
         
-        XCTAssertTrue(ork_doubleEqual(data.distance.doubleValue, [sample[@"distance"] doubleValue]), @"");
-        XCTAssertEqual(data.numberOfSteps.integerValue, [sample[@"numberOfSteps"] integerValue], @"");
-        XCTAssertTrue(ork_doubleEqual(data.floorsAscended.doubleValue, [sample[@"floorsAscended"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual(data.floorsDescended.doubleValue, [sample[@"floorsDescended"] doubleValue]), @"");
+        XCTAssertTrue(ork_doubleEqual(data.distance.doubleValue, ((NSNumber *)sample[@"distance"]).doubleValue), @"");
+        XCTAssertEqual(data.numberOfSteps.integerValue, ((NSNumber *)sample[@"numberOfSteps"]).integerValue, @"");
+        XCTAssertTrue(ork_doubleEqual(data.floorsAscended.doubleValue, ((NSNumber *)sample[@"floorsAscended"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual(data.floorsDescended.doubleValue, ((NSNumber *)sample[@"floorsDescended"]).doubleValue), @"");
     }
 }
 
@@ -590,13 +583,13 @@ static const NSInteger kNumberOfSamples = 5;
     
     for (NSDictionary *sample in _items) {
         
-        XCTAssertTrue(ork_doubleEqual([touch locationInView:nil].x, [sample[@"x"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual([touch locationInView:nil].y, [sample[@"y"] doubleValue]), @"");
-        XCTAssertTrue(ork_doubleEqual([touch timestamp], [sample[@"timestamp"] doubleValue]), @"");
-        XCTAssertEqual([view bounds].size.width, [sample[@"width"] floatValue], @"");
-        XCTAssertEqual([view bounds].size.height, [sample[@"height"] floatValue], @"");
-        XCTAssertEqual(0, [sample[@"index"] integerValue], @"");
-        XCTAssertEqual([touch phase], [sample[@"phase"] integerValue], @"");
+        XCTAssertTrue(ork_doubleEqual([touch locationInView:nil].x, ((NSNumber *)sample[@"x"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual([touch locationInView:nil].y, ((NSNumber *)sample[@"y"]).doubleValue), @"");
+        XCTAssertTrue(ork_doubleEqual([touch timestamp], ((NSNumber *)sample[@"timestamp"]).doubleValue), @"");
+        XCTAssertEqual(view.bounds.size.width, ((NSNumber *)sample[@"width"]).floatValue, @"");
+        XCTAssertEqual(view.bounds.size.height, ((NSNumber *)sample[@"height"]).floatValue, @"");
+        XCTAssertEqual(0, ((NSNumber *)sample[@"index"]).integerValue, @"");
+        XCTAssertEqual([touch phase], ((NSNumber *)sample[@"phase"]).integerValue, @"");
     }
 }
 

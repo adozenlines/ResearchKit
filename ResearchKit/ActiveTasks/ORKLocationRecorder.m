@@ -30,11 +30,14 @@
 
 
 #import "ORKLocationRecorder.h"
-#import <CoreLocation/CoreLocation.h>
-#import "CLLocation+ORKJSONDictionary.h"
+
 #import "ORKDataLogger.h"
+
 #import "ORKRecorder_Internal.h"
-#import "ORKRecorder_Private.h"
+
+#import "CLLocation+ORKJSONDictionary.h"
+
+#import <CoreLocation/CoreLocation.h>
 
 
 @interface ORKLocationRecorder () <CLLocationManagerDelegate> {
@@ -43,7 +46,7 @@
     BOOL _started;
 }
 
-@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong, nullable) CLLocationManager *locationManager;
 
 @property (nonatomic) NSTimeInterval uptime;
 
@@ -75,11 +78,11 @@
 - (void)start {
     [super start];
     
-    if (! _logger) {
-        NSError *err = nil;
-        _logger = [self makeJSONDataLoggerWithError:&err];
-        if (! _logger) {
-            [self finishRecordingWithError:err];
+    if (!_logger) {
+        NSError *error = nil;
+        _logger = [self makeJSONDataLoggerWithError:&error];
+        if (!_logger) {
+            [self finishRecordingWithError:error];
             return;
         }
     }
@@ -91,10 +94,10 @@
     self.locationManager.pausesLocationUpdatesAutomatically = NO;
     self.locationManager.delegate = self;
     
-    if (! self.locationManager) {
+    if (!self.locationManager) {
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain
                                              code:NSFeatureUnsupportedError
-                                         userInfo:@{@"recorder" : self}];
+                                         userInfo:@{@"recorder": self}];
         [self finishRecordingWithError:error];
         return;
     }
@@ -128,10 +131,10 @@
 - (void)locationManager:(CLLocationManager *)manager
      didUpdateLocations:(NSArray *)locations {
     BOOL success = YES;
-    NSParameterAssert([locations count] >= 0);
+    NSParameterAssert(locations.count >= 0);
     NSError *error = nil;
     if (locations) {
-        NSMutableArray *dictionaries = [NSMutableArray arrayWithCapacity:[locations count]];
+        NSMutableArray *dictionaries = [NSMutableArray arrayWithCapacity:locations.count];
         [locations enumerateObjectsUsingBlock:^(CLLocation *obj, NSUInteger idx, BOOL *stop) {
             NSDictionary *d = [obj ork_JSONDictionary];
             [dictionaries addObject:d];
@@ -165,11 +168,6 @@
 - (NSString *)mimeType {
     return @"application/json";
 }
-
-@end
-
-
-@interface ORKLocationRecorderConfiguration ()
 
 @end
 

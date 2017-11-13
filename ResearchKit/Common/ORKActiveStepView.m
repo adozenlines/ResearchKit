@@ -30,8 +30,12 @@
 
 
 #import "ORKActiveStepView.h"
-#import "ORKTintedImageView.h"
+
+#import "ORKCustomStepView_Internal.h"
 #import "ORKNavigationContainerView_Internal.h"
+#import "ORKStepHeaderView_Internal.h"
+#import "ORKTintedImageView.h"
+
 #import "ORKActiveStep_Internal.h"
 #import "ORKStep_Private.h"
 
@@ -65,7 +69,7 @@
 - (void)setActiveStep:(ORKActiveStep *)step {
     self.continueSkipContainer.useNextForSkip = step.shouldUseNextAsSkipButton;
     _activeStep = step;
-    self.headerView.instructionLabel.hidden = ! (_activeStep.hasText);
+    self.headerView.instructionLabel.hidden = !(_activeStep.hasText);
     
     self.headerView.captionLabel.text = _activeStep.title;
     self.headerView.instructionLabel.text = _activeStep.text;
@@ -76,7 +80,7 @@
     _imageView.shouldApplyTint = _activeStep.shouldTintImages;
     [self updateStepView];
     
-    BOOL neverHasContinueButton = (step.shouldContinueOnFinish && ! step.startsFinished);
+    BOOL neverHasContinueButton = (step.shouldContinueOnFinish && !step.startsFinished);
     [self.continueSkipContainer setNeverHasContinueButton:neverHasContinueButton];
     
     [self.continueSkipContainer updateContinueAndSkipEnabled];

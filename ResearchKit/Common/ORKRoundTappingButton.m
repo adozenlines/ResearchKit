@@ -28,7 +28,7 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+#import "ORKTextButton_Internal.h"
 #import "ORKRoundTappingButton.h"
 
 
@@ -39,17 +39,22 @@ static const CGFloat RoundTappingButtonDiameter = 104;
 - (void)init_ORKTextButton {
     [super init_ORKTextButton];
     self.fadeDelay = 0.2;
-    self.layer.cornerRadius = RoundTappingButtonDiameter*0.5;
+    self.diameter = RoundTappingButtonDiameter;
+}
+
+- (void)setDiameter:(CGFloat)diameter_ {
+    diameter = diameter_;
+    self.layer.cornerRadius = diameter * 0.5;
 }
 
 - (CGSize)intrinsicContentSize {
-    return CGSizeMake(RoundTappingButtonDiameter, RoundTappingButtonDiameter);
+    return CGSizeMake(diameter, diameter);
 }
 
 + (UIFont *)defaultFont {
     // regular, 20
     UIFontDescriptor *descriptor = [UIFontDescriptor preferredFontDescriptorWithTextStyle:UIFontTextStyleHeadline];
-    return [UIFont systemFontOfSize:[[descriptor objectForKey: UIFontDescriptorSizeAttribute] doubleValue]+3.0];
+    return [UIFont systemFontOfSize:((NSNumber *)[descriptor objectForKey:UIFontDescriptorSizeAttribute]).doubleValue + 3.0];
 }
 
 #pragma mark Accessibility

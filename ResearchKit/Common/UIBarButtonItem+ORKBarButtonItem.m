@@ -30,14 +30,23 @@
 
 
 #import "UIBarButtonItem+ORKBarButtonItem.h"
-#import "ORKDefines_Private.h"
+
+#import "ORKHelpers_Internal.h"
 
 
 @implementation UIBarButtonItem (ORKBarButtonItem)
 
-+ (UIBarButtonItem *)obk_backBarButtonItemWithTarget:(id)target action:(SEL)selector {
-    UIImage *image = [UIImage imageNamed:@"arrowLeft" inBundle:ORKBundle() compatibleWithTraitCollection:nil];
-    UIImage *landscapeImage = [UIImage imageNamed:@"arrowLeftLandscape" inBundle:ORKBundle() compatibleWithTraitCollection:nil];
++ (UIBarButtonItem *)ork_backBarButtonItemWithTarget:(id)target action:(SEL)selector {
+    NSString *regularImageName = @"arrowLeft";
+    NSString *landscapeImageName = @"arrowLeftLandscape";
+
+    if ([UIApplication sharedApplication].userInterfaceLayoutDirection == UIUserInterfaceLayoutDirectionRightToLeft ) {
+        regularImageName = @"arrowRight";
+        landscapeImageName = @"arrowRightLandscape";
+    }
+    
+    UIImage *image = [UIImage imageNamed:regularImageName inBundle:ORKBundle() compatibleWithTraitCollection:nil];
+    UIImage *landscapeImage = [UIImage imageNamed:landscapeImageName inBundle:ORKBundle() compatibleWithTraitCollection:nil];
     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithImage:image
                                                landscapeImagePhone:landscapeImage
                                                              style:UIBarButtonItemStyleDone
